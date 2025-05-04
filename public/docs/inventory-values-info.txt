@@ -1,0 +1,46 @@
+Understanding the Calculations
+
+How each value is calculated:
+
+1. Average Buy Price:
+   - Calculated by taking the average of:
+     * The product's standard buy price
+     * The average price of all purchases made for this product
+   Example: If standard buy price is PKR 2,000 and average purchase price is PKR 2,400
+   Then Average Buy Price = (PKR 2,000 + PKR 2,400) ÷ 2 = PKR 2,200
+
+2. Average Sale Price:
+   - Calculated by taking the average of:
+     * The product's standard sale price
+     * The average price of all sales made for this product
+   Example: If standard sale price is PKR 3,000 and average sale price is PKR 3,400
+   Then Average Sale Price = (PKR 3,000 + PKR 3,400) ÷ 2 = PKR 3,200
+
+3. Opening Value:
+   - Represents the value at the start of the selected period
+   - Calculated as:
+     * Initial stock quantity × Buy price
+     * Plus the value of all purchases made before the start date
+     * Minus the value of all sales made before the start date
+
+4. IN Value:
+   - Shows the total value of purchases made during the selected period
+   - Includes:
+     * All purchases made between the selected From and To dates
+     * Each purchase is calculated as: Quantity × Purchase Price
+
+5. OUT Value:
+   - Shows the total value of sales made during the selected period
+   - Includes:
+     * All sales made between the selected From and To dates
+     * Each sale is calculated as: Quantity × Sale Price
+
+6. Closing Value:
+   - Represents the final value of inventory at the end of the period
+   - Calculated as:
+     * First, calculate final quantity = Initial quantity + Total purchases - Total sales
+     * Then multiply this quantity by the Average Buy Price
+   Example: If final quantity is 100 units and Average Buy Price is PKR 2,200
+   Then Closing Value = 100 × PKR 2,200 = PKR 220,000
+
+Note: All calculations take into account the actual transaction prices rather than standard prices to give you the most accurate view of your inventory values. All amounts are in Pakistani Rupees (PKR). 

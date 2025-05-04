@@ -1,0 +1,38 @@
+-- Opening Balance
+SELECT
+    opening_qty,
+    buy_price
+FROM
+    inventories
+WHERE
+    id = ?;
+
+-- Purchases (IN)
+SELECT
+    purchases.purchase_date AS date,
+    vendors.name AS party,
+    purchase_items.quantity AS `in`,
+    purchase_items.rate AS rate
+FROM
+    purchase_items
+INNER JOIN purchases ON purchase_items.purchase_id = purchases.id
+INNER JOIN vendors ON purchases.vendor_id = vendors.id
+WHERE
+    purchase_items.product_id = ?
+ORDER BY
+    purchases.purchase_date;
+
+-- Sales (OUT)
+SELECT
+    sales.sale_date AS date,
+    customers.name AS party,
+    sale_items.quantity AS `out`,
+    sale_items.rate AS rate
+FROM
+    sale_items
+INNER JOIN sales ON sale_items.sale_id = sales.id
+INNER JOIN customers ON sales.customer_id = customers.id
+WHERE
+    sale_items.product_id = ?
+ORDER BY
+    sales.sale_date;
