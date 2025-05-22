@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Customer Ledger - {{ $customer->name }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>    <title>Customer Ledger - {{ $customer->name }}</title>
+    @include('components.pdf-styles')
     <style>
         body { 
             font-family: sans-serif; 
@@ -104,7 +104,7 @@
 <body>
     <div class="header-section">
         <div class="company-section">
-            <div class="company-name">Steh Enterprise</div>
+            <x-company-info />
             <div class="report-title">Customer Ledger</div>
         </div>
         <div class="customer-details">
@@ -174,10 +174,8 @@
                 </tr>
             @endforeach
         </tbody>
-    </table>
-
-    <div class="footer">
-        <span class="developer">App Developed By: NFTech's Grocer +923162694747</span>
+    </table>    <div class="footer">
+        <x-company-info :showPoweredBy="true" />
     </div>
 
     <script type="text/php">

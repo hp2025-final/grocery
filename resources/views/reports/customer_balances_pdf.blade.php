@@ -90,7 +90,7 @@
 <body>
     <div class="header-section">
         <div class="company-section">
-            <div class="company-name">Steh Enterprise</div>
+            <x-company-info />
             <div class="report-title">Customer Balances Report</div>
         </div>
     </div>
@@ -130,7 +130,7 @@
     </table>
 
     <div class="footer">
-        <div class="developer">Powered by Steh Enterprise</div>
+        <x-company-info :showPoweredBy="true" />
     </div>
     <div class="page-number">Page 1</div>
 </body>

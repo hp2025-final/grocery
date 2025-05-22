@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Sale Invoice #{{ $sale->sale_number }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>    <title>Sale Invoice #{{ $sale->sale_number }}</title>
+    @include('components.pdf-styles')
     <style>
         body {
             font-family: sans-serif;
@@ -115,7 +115,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="company-name">Steh Enterprise</div>
+            <x-company-info />
             <div class="invoice-title">SALES INVOICE</div>
             <div class="invoice-number">#{{ $sale->sale_number }}</div>
         </div>
