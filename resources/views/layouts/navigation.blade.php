@@ -16,7 +16,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Receivable Forms</span>
+                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Receivables</span>
                 <svg :class="{'transform rotate-90': activeSection === 'receivables'}" class="h-4 w-4 ml-2 text-gray-500 transition-transform duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l6 6-6 6" />
                 </svg>
@@ -51,7 +51,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Payable Forms</span>
+                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Payables</span>
                 <svg :class="{'transform rotate-90': activeSection === 'payables'}" class="h-4 w-4 ml-2 text-gray-500 transition-transform duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l6 6-6 6" />
                 </svg>
@@ -86,7 +86,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
-                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Inventory Forms</span>
+                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Inventories</span>
                 <svg :class="{'transform rotate-90': activeSection === 'inventory'}" class="h-4 w-4 ml-2 text-gray-500 transition-transform duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l6 6-6 6" />
                 </svg>
@@ -126,7 +126,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l9-4 9 4v12l-9 4-9-4V6z M12 3v18 M3 6l9 4 9-4" />
                 </svg>
-                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Bank Forms</span>
+                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Cash and Bank</span>
                 <svg :class="{'transform rotate-90': activeSection === 'bank'}" class="h-4 w-4 ml-2 text-gray-500 transition-transform duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l6 6-6 6" />
                 </svg>
@@ -134,12 +134,12 @@
             <ul class="space-y-1 mt-1 pl-3 border-l border-gray-100" x-show="activeSection === 'bank'" x-transition>
                 <li>
                     <a href="{{ route('banks.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('banks.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                        Add Bank
+                        Add Cash and Bank
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('bank_transfers.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('bank_transfers.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                        Internal Bank Transfer
+                        Internal Funds Transfer
                     </a>
                 </li>
                 <li>
@@ -156,7 +156,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
                 </svg>
-                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Expense Forms</span>
+                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Expenses</span>
                 <svg :class="{'transform rotate-90': activeSection === 'expense'}" class="h-4 w-4 ml-2 text-gray-500 transition-transform duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l6 6-6 6" />
                 </svg>

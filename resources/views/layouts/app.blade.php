@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.company.name') }}</title>
+    <title>{{ config('company.name') }}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Optionally include Breeze's CSS/JS if needed -->
@@ -22,7 +22,7 @@
                 </svg>
             </button>
 
-            <span class="text-xl font-bold text-gray-900">{{ config('app.company.name') }}</span>
+            <span class="text-xl font-bold text-gray-900">{{ config('company.name') }}</span>
         </div>
         <div class="flex flex-1 h-[calc(100vh-3.5rem)] overflow-hidden">
             <!-- Sidebar (desktop) -->

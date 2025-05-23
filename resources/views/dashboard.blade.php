@@ -8,8 +8,8 @@
         <button @click="setPeriod('week')" :class="period==='week' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-300 text-gray-500'" class="text-xs px-2 py-1 border rounded transition">This Week</button>
         <button @click="setPeriod('month')" :class="period==='month' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-gray-300 text-gray-500'" class="text-xs px-2 py-1 border rounded transition">This Month</button>
     </div>
-    <!-- KPI Cards - Redesigned like reference screenshot -->
-    <div class="bg-white rounded-xl shadow border border-gray-200 mb-6">
+    <!-- KPI Cards -->
+    <div class="bg-white rounded-xl shadow border border-gray-200">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
             <div class="flex flex-col justify-between p-5 min-w-[160px]">
                 <div class="flex items-center justify-between mb-2">
@@ -48,66 +48,58 @@
             </div>
         </div>
     </div>
-    <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-        <div class="bg-white rounded-xl p-6 shadow flex flex-col items-center min-h-[300px]">
-            <h3 class="text-lg font-semibold mb-4">Sale Chart</h3>
-            <template x-if="saleChartData.length > 0">
-                <div class="w-full h-56 flex items-end justify-between">
-                    <svg :width="saleChartData.length * 18" height="200" class="block mx-auto">
-                        <template x-for="(val, idx) in saleChartData" :key="idx">
-                            <rect :x="idx * 18" :y="200 - (val/maxSale*180)" :width="14" :height="(val/maxSale*180)" rx="3" :fill="'#22292f'" />
-                        </template>
-                    </svg>
-                </div>
-            </template>
-            <template x-if="saleChartData.length === 0">
-                <div class="w-full h-56 flex items-center justify-center text-gray-400">No data</div>
-            </template>
-        </div>
-        <div class="bg-white rounded-xl p-6 shadow flex flex-col items-center min-h-[300px]">
-            <h3 class="text-lg font-semibold mb-4">Top Selling Product Chart</h3>
-            <div class="w-full h-56 flex items-center justify-center text-gray-400">[Top Selling Product Chart]</div>
-        </div>
+    
+    <!-- Quick Action Buttons -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6">
+        <!-- Add Sale -->
+        <a href="{{ route('sales.create') }}" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="text-sm font-medium text-gray-900">Add Sale</span>
+        </a>
+        
+        <!-- Add Purchase -->
+        <a href="{{ route('purchases.create') }}" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="text-sm font-medium text-gray-900">Add Purchase</span>
+        </a>
+
+        <!-- Add Receipt -->
+        <a href="{{ route('customer-receipts.create') }}" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+            </svg>
+            <span class="text-sm font-medium text-gray-900">Add Receipt</span>
+        </a>
+
+        <!-- Add Payment -->
+        <a href="{{ route('vendor-payments.create') }}" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span class="text-sm font-medium text-gray-900">Add Payment</span>
+        </a>
+
+        <!-- Add Expense -->
+        <a href="{{ route('expenses.create') }}" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+            </svg>
+            <span class="text-sm font-medium text-gray-900">Add Expense</span>
+        </a>
+
+        <!-- Internal Funds Transfer -->
+        <a href="{{ route('bank_transfers.create') }}" class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+            <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span class="text-sm font-medium text-gray-900">Internal Funds Transfer</span>
+        </a>
     </div>
-    <!-- Recent Entries Table -->
-    <div class="bg-white rounded-xl shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold">Recent Journal Entries</h2>
-            <template x-if="loading"><span class="text-sm text-gray-400 ml-2">Loading...</span></template>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-left">Date</th>
-                        <th class="px-4 py-2 text-left">Entry #</th>
-                        <th class="px-4 py-2 text-left">Description</th>
-                        <th class="px-4 py-2 text-left">Reference</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-for="entry in entries" :key="entry.id">
-                        <tr>
-                            <td class="px-4 py-2" x-text="entry.date"></td>
-                            <td class="px-4 py-2" x-text="entry.entry_number"></td>
-                            <td class="px-4 py-2" x-text="entry.description"></td>
-                            <td class="px-4 py-2" x-text="entry.reference_type"></td>
-                        </tr>
-                    </template>
-                    <template x-if="entries.length === 0 && !loading">
-                        <tr><td colspan="4" class="px-4 py-2 text-center text-gray-400">No entries found.</td></tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
-        <!-- Pagination -->
-        <div class="flex justify-end mt-4 space-x-2">
-            <button @click="prevPage" :disabled="page === 1" class="px-3 py-1 rounded bg-gray-200 text-gray-600 hover:bg-gray-300 disabled:opacity-50">Prev</button>
-            <span class="px-2 py-1">Page <span x-text="page"></span></span>
-            <button @click="nextPage" :disabled="!hasMore" class="px-3 py-1 rounded bg-gray-200 text-gray-600 hover:bg-gray-300 disabled:opacity-50">Next</button>
-        </div>
-    </div>
+
     <!-- Alpine.js Dashboard Script -->
     <script>
     function dashboard() {
@@ -115,24 +107,10 @@
             period: 'today',
             kpi: {sales: 0, receipt: 0, purchase: 0, payment: 0, expense: 0},
             trend: {sales: 0, receipt: 0, purchase: 0, payment: 0, expense: 0}, // Placeholder for future trend
-            saleChartData: [],
-            maxSale: 1,
-            entries: [],
-            page: 1,
-            hasMore: false,
             loading: false,
             setPeriod(p) {
                 this.period = p;
-                this.page = 1;
                 this.fetchKPIs();
-                this.fetchEntries();
-                this.fetchSaleChartData();
-            },
-            prevPage() {
-                if (this.page > 1) { this.page--; this.fetchEntries(); }
-            },
-            nextPage() {
-                if (this.hasMore) { this.page++; this.fetchEntries(); }
             },
             fetchKPIs() {
                 this.loading = true;
@@ -152,36 +130,8 @@
                         this.loading = false;
                     });
             },
-            fetchEntries() {
-                this.loading = true;
-                fetch(`/dashboard/journal-entries?page=${this.page}&period=${this.period}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        this.entries = data.entries;
-                        this.hasMore = data.hasMore;
-                        this.loading = false;
-                    });
-            },
             init() {
                 this.fetchKPIs();
-                this.fetchEntries();
-                this.fetchSaleChartData();
-            },
-            fetchSaleChartData() {
-                console.log('Fetching sale chart data for period:', this.period);
-                fetch(`/dashboard/sale-chart?period=${this.period}`)
-                    .then(r => {
-                        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
-                        return r.json();
-                    })
-                    .then(data => {
-                        console.log('Sale chart data:', data);
-                        this.saleChartData = data;
-                        this.maxSale = Math.max(...data.map(d => d.amount), 1);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching sale chart data:', error);
-                    });
             }
         }
     }

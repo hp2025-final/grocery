@@ -10,7 +10,7 @@ use App\Http\Controllers\InventoryBalancesController;
 use App\Http\Controllers\InventoryValuesController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');

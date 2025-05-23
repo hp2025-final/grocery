@@ -167,21 +167,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Company Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This configuration contains company-specific settings that are used
-    | throughout the application.
-    |
-    */
-    'company' => [
-        'name' => env('COMPANY_NAME', 'Steh Enterprise'),
-        'address' => env('COMPANY_ADDRESS', '123 Business Street, City'),
-        'email' => env('COMPANY_EMAIL', 'info@company.com'),
-        'phone' => env('COMPANY_PHONE', '+1 234 567 8900'),
-        'powered_by' => env('COMPANY_POWERED_BY', 'Powered by Steh Enterprise'),
-    ],
+    // Company configuration has been moved to config/company.php
 
 ];
