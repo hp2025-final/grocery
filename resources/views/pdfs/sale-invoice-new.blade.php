@@ -2,8 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Purchase Invoice #{{ $purchase->purchase_number }}</title>
-    <style>
+    <title>Sale Invoice #{{ $sale->sale_number }}</title>    <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -12,8 +11,7 @@
         .header {
             text-align: left;
             margin-bottom: 30px;
-        }
-        .company-name {
+        }        .company-name {
             font-size: 36px;
             font-weight: bold;
             margin-bottom: 5px;
@@ -22,15 +20,13 @@
             font-size: 14px;
             color: #666;
             margin-bottom: 5px;
-        }
-        .invoice-title {
+        }        .invoice-title {
             font-size: 20px;
             font-weight: bold;
             margin: 20px 0;
             color: #333;
             text-align: right;
-        }
-        .invoice-details {
+        }        .invoice-details {
             margin-bottom: 20px;
             width: 100%;
             font-size: 13px;
@@ -46,15 +42,33 @@
         }
         .customer-details {
             margin-bottom: 10px;
-        }
-        table.items {
+        }        table.items {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             font-size: 12px;
             border: 1px solid #ddd;
         }
-        .items th {
+        .items th:nth-child(1),
+        .items td:nth-child(1) {
+            width: 5%;
+        }
+        .items th:nth-child(2),
+        .items td:nth-child(2) {
+            width: 50%;
+        }
+        .items th:nth-child(3),
+        .items td:nth-child(3) {
+            width: 15%;
+        }
+        .items th:nth-child(4),
+        .items td:nth-child(4) {
+            width: 15%;
+        }
+        .items th:nth-child(5),
+        .items td:nth-child(5) {
+            width: 15%;
+        }.items th {
             background: #000000;
             color: #ffffff;
             padding: 8px;
@@ -76,7 +90,7 @@
         .items th:nth-child(5),
         .items td:nth-child(5) {
             text-align: center;
-        }
+        }        
         .items th:nth-child(1),
         .items td:nth-child(1) {
             width: 5%;
@@ -90,12 +104,13 @@
             width: 15%;
         }
         .items th:nth-child(4),
-        .items td:nth-child(4),
+        .items td:nth-child(4) {
+            width: 15%;
+        }
         .items th:nth-child(5),
         .items td:nth-child(5) {
             width: 15%;
-        }
-        .totals {
+        }        .totals {
             width: 100%;
             margin-top: 20px;
             border: 2px solid #ddd;
@@ -116,8 +131,7 @@
         .totals tr:last-child td {
             background: #000000;
             color: #ffffff;
-        }
-        .footer {
+        }        .footer {
             position: fixed;
             bottom: 20px;
             left: 0;
@@ -134,8 +148,7 @@
         }
     </style>
 </head>
-<body>
-    <!-- HEADER SECTION -->
+<body>    <!-- HEADER SECTION -->
     <div class="header">
         <div style="float: left;">
             <div class="company-name">{{ config('company.name') }}</div>
@@ -143,31 +156,27 @@
             <div class="company-details">Email: {{ config('company.email') }}</div>
         </div>
         <div style="float: right; margin-top: 10px;">
-            <div class="invoice-title">PURCHASE INVOICE</div>
+            <div class="invoice-title">SALES INVOICE</div>
         </div>
-        <div style="clear: both;"></div>
-    </div>
+        <div style="clear: both;"></div>    </div>
     <div style="border-bottom: 2px solid #ddd; margin: 20px 0;"></div>
 
     <!-- BILLING INFORMATION SECTION -->
     <table class="invoice-details">
         <tr>
             <td>
-                <strong>Vendor:</strong><br>
-                {{ $purchase->vendor->name }}<br>
-                @if($purchase->vendor->address)
-                {{ $purchase->vendor->address }}<br>
+                <strong>Invoice To:</strong><br>
+                {{ $sale->customer->name }}<br>
+                @if($sale->customer->address)
+                {{ $sale->customer->address }}<br>
                 @endif
-                @if($purchase->vendor->phone)
-                Phone: {{ $purchase->vendor->phone }}<br>
+                @if($sale->customer->phone)
+                Phone: {{ $sale->customer->phone }}<br>
                 @endif
             </td>
             <td style="text-align: right;">
-                <strong>Invoice Number:</strong> {{ $purchase->purchase_number }}<br>
-                <strong>Date:</strong> {{ date('d-m-Y', strtotime($purchase->purchase_date)) }}<br>
-            </td>
-        </tr>
-    </table>
+                <strong>Invoice Number:</strong> {{ $sale->sale_number }}<br>
+                <strong>Date:</strong> {{ date('d-m-Y', strtotime($sale->sale_date)) }}<br>            </td>        </tr>    </table>
     <div style="border-bottom: 1px solid #ddd; margin: 20px 0;"></div>
 
     <!-- ITEMS TABLE SECTION -->
@@ -182,53 +191,46 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($purchase->items as $index => $item)
+            @foreach($sale->items as $index => $item)
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $item->product->name }}</td>
-                <td>{{ number_format($item->quantity, 2) }} {{ $item->unit->name ?? '' }}</td>
-                <td class="amount-cell">Rs. {{ number_format($item->rate, 2) }}</td>
-                <td class="amount-cell">Rs. {{ number_format($item->total_amount, 2) }}</td>
+                <td>{{ $item->quantity }} {{ $item->product->unit }}</td>
+                <td class="amount-cell">Rs. {{ number_format($item->unit_price, 2) }}</td>
+                <td class="amount-cell">Rs. {{ number_format($item->quantity * $item->unit_price, 2) }}</td>
             </tr>
             @endforeach
-        </tbody>
+    </tbody>
     </table>
 
     <!-- SUMMARY SECTION -->
     <table class="totals" align="right" style="width: 300px;">
         <tr>
             <td><strong>Subtotal:</strong></td>
-            <td class="amount-cell">Rs. {{ number_format($purchase->total_amount, 2) }}</td>
+            <td class="amount-cell">Rs. {{ number_format($sale->total_amount, 2) }}</td>
         </tr>
-        @if($purchase->discount_amount > 0)
+        @if($sale->discount_amount > 0)
         <tr>
             <td><strong>Discount:</strong></td>
-            <td class="amount-cell">Rs. {{ number_format($purchase->discount_amount, 2) }}</td>
+            <td class="amount-cell">Rs. {{ number_format($sale->discount_amount, 2) }}</td>
         </tr>
         @endif
         <tr>
             <td><strong>Net Amount:</strong></td>
-            <td class="amount-cell"><strong>Rs. {{ number_format($purchase->net_amount, 2) }}</strong></td>
-        </tr>
-    </table>
-
-    <!-- NOTES SECTION -->
-    @if($purchase->notes)
+            <td class="amount-cell"><strong>Rs. {{ number_format($sale->net_amount, 2) }}</strong></td>
+        </tr>    </table>    <!-- NOTES SECTION -->
+    @if($sale->notes)
     <div style="margin-top: 30px;">
-        <strong>Notes:</strong> {{ $purchase->notes }}
+        <strong>Notes:</strong> {{ $sale->notes }}
     </div>
     <div style="border-bottom: 1px solid #ddd; margin: 20px 0;"></div>
-    @endif
-
-    <!-- SIGNATURES SECTION -->
+    @endif    <!-- SIGNATURES SECTION -->
     <div style="margin-top: 40px; text-align: center;">
         <div style="font-size: 11px; font-style: italic; color: #666; margin-bottom: 20px;">
             {{ config('company.authentication_notice') }}
         </div>
         <div style="border-bottom: 1px solid #ddd; margin: 20px 0;"></div>
-    </div>
-
-    <!-- FOOTER SECTION -->
+    </div>    <!-- FOOTER SECTION -->
     <div class="footer">
         {{ config('company.address') }}<br>
         {{ config('company.powered_by') }}

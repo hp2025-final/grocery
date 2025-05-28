@@ -2,6 +2,25 @@
 @section('content')
 <div class="min-h-screen bg-gray-100 py-6">
     <div class="max-w-5xl mx-auto">
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4 mb-6">
+            <a href="{{ route('sales.index') }}" 
+                class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-all duration-150 hover:shadow">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Sales
+            </a>
+            <a href="{{ route('sales.pdf', $sale->id) }}" 
+                class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm transition-all duration-150 hover:shadow"
+                target="_blank">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Export PDF
+            </a>
+        </div>
+
         <!-- Invoice Card -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <!-- Company Header -->
@@ -26,27 +45,10 @@
                         </div>
                     </div>
                     <!-- Invoice Title -->
-                    <div>
-                        <div class="text-right mb-4">
-                            <h2 class="text-xs font-semibold text-gray-700">SALE INVOICE</h2>
-                            <p class="text-sm font-medium text-gray-600">#{{ $sale->sale_number }}</p>
-                        </div>
-                        <div class="flex justify-end space-x-2">
-                            <a href="{{ route('sales.index') }}" 
-                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors duration-150">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                                </svg>
-                                Back
-                            </a>
-                            <a href="{{ route('sales.pdf', $sale->id) }}" 
-                                class="inline-flex items-center px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded transition-colors duration-150"
-                                target="_blank">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                </svg>
-                                PDF
-                            </a>
+                    <div class="text-right">
+                        <div class="inline-block px-4 py-2 rounded-lg bg-blue-50 border border-blue-100">
+                            <h2 class="text-sm font-medium text-blue-600">SALE INVOICE</h2>
+                            <p class="text-xl font-semibold text-blue-800 mt-1">#{{ $sale->sale_number }}</p>
                         </div>
                     </div>
                 </div>
@@ -116,7 +118,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $index + 1 }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $item->product->name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->quantity, 2) }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $item->unit->name ?? '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $item->product->unit_name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->rate, 2) }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->total_amount, 2) }}</td>
                             </tr>

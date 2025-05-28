@@ -28,6 +28,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('sales.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('sales.index') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        All Sale Invoices
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('customer-receipts.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('customer-receipts.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
                         Customer Receipt
                     </a>
@@ -60,6 +65,11 @@
                 <li>
                     <a href="{{ route('purchases.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('purchases.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
                         Add Purchase
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('purchases.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('purchases.index') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        All Purchase Invoices
                     </a>
                 </li>
                 <li>

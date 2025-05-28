@@ -28,6 +28,7 @@ Route::middleware(['auth', 'web'])->group(function () {
     // Placeholder module routes
     Route::get('/sales/create', [App\Http\Controllers\SaleController::class, 'create'])->name('sales.create');
     Route::post('/sales', [App\Http\Controllers\SaleController::class, 'store'])->name('sales.store');
+    Route::get('/sales/{id}', [App\Http\Controllers\SaleController::class, 'show'])->name('sales.show');
 
     // Expense Accounts
     Route::get('/expense-accounts', [App\Http\Controllers\ExpenseAccountController::class, 'index'])->name('expense_accounts.index');
@@ -70,6 +71,7 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     Route::get('/purchases/create', [App\Http\Controllers\PurchaseController::class, 'create'])->name('purchases.create');
     Route::post('/purchases', [App\Http\Controllers\PurchaseController::class, 'store'])->name('purchases.store');
+    Route::get('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'show'])->name('purchases.show');
     Route::get('/purchases/{id}/edit', [App\Http\Controllers\PurchaseController::class, 'edit'])->name('purchases.edit');
     Route::put('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'update'])->name('purchases.update');
     Route::delete('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'destroy'])->name('purchases.destroy');

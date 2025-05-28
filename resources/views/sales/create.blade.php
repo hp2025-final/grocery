@@ -202,7 +202,7 @@
                 <!-- Submit Button -->
                 <div class="flex justify-end pt-4">
                     <button type="submit" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded px-8 py-2 transition">
+                        class="bg-gray-900 hover:bg-gray-800 text-white font-bold rounded px-8 py-2 transition">
                         Save Sale
                     </button>
                 </div>
@@ -212,67 +212,68 @@
     <!-- Sales List Right (Section B: Invoice-style All Sales) -->
     <div class="bg-white rounded-xl shadow p-2 sm:p-4 md:p-8 w-full md:w-3/5">
         <h2 class="text-xl font-bold mb-4">All Sales (Invoice View)</h2>
-        <form method="get" class="mb-4 flex flex-col md:flex-row md:space-x-4 items-end">
-            <div class="mb-2 md:mb-0 w-full md:w-auto">
-                <label class="block text-sm font-medium mb-1">Search</label>
-                <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Invoice # or Customer" class="form-input w-full text-xs" />
+        <form method="get" class="mb-6 flex flex-col md:flex-row md:space-x-4 items-end">
+            <div class="mb-2 md:mb-0 w-full md:w-auto flex-grow">
+                <label class="block text-sm font-medium mb-1 text-gray-700">Search</label>
+                <input type="text" name="search" value="{{ $search ?? '' }}" 
+                    placeholder="Search by invoice # or customer" 
+                    class="form-input w-full rounded-lg border-gray-300 shadow-sm text-sm" />
             </div>
-            <button type="submit" class="btn btn-primary text-xs w-full md:w-auto">Search</button>
+            <button type="submit" class="btn bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200">
+                Search
+            </button>
         </form>
         <div class="space-y-4">
             @forelse($sales as $sale)
-                <div class="border rounded-lg p-2 sm:p-4 invoice-table">
-                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-2 invoice-header">
-                        <div class="mb-2 md:mb-0">
-                            <span class="label">Invoice No:</span> <span class="value">{{ $sale->sale_number }}</span><br>
-                            <span class="label">Date:</span> <span class="value">{{ $sale->sale_date }}</span><br>
-                            <span class="label">Customer:</span> <span class="value">{{ $sale->customer->name ?? '-' }}</span>
-                        </div>
-                        <div class="flex flex-row md:flex-col justify-between items-center md:items-end">
-                            <span class="amount text-right"><span class="label">Total:</span> {{ number_format($sale->net_amount ?? $sale->total_amount ?? 0, 2) }} Rs.</span>
-                            <div class="flex space-x-1 mt-1">
-                                <a href="{{ route('sales.pdf', $sale->id) }}" class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs" title="Export PDF">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
-                                </a>
-                                <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this sale?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs">Delete</button>
-                                </form>
-                            </div>
+                <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100">
+                    <!-- Action Buttons -->
+                    <div class="px-4 py-2 bg-gray-50 flex justify-between items-center border-b">
+                        <span class="text-sm font-medium text-gray-600 border-r border-gray-200 pr-4">#{{ $sale->sale_number }}</span>
+                        <div class="flex space-x-2">
+                        <a href="{{ route('sales.show', $sale->id) }}" 
+                           class="p-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors duration-200"
+                           title="View">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </a>
+                        <a href="{{ route('sales.pdf', $sale->id) }}" 
+                           class="p-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors duration-200"
+                           target="_blank"
+                           title="Print">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                        </a>
+                        <form action="{{ route('sales.destroy', $sale->id) }}" method="POST" class="inline-block" 
+                              onsubmit="return confirm('Are you sure you want to delete this sale?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200"
+                                    title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </form>
                         </div>
                     </div>
-                    <div class="overflow-x-auto -mx-2 sm:mx-0">
-                        <table class="min-w-full border mt-2 text-xs">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="px-2 sm:px-4 py-2 border text-left">#</th>
-                                    <th class="px-2 sm:px-4 py-2 border text-left">Product</th>
-                                    <th class="px-2 sm:px-4 py-2 border text-right">Qty</th>
-                                    <th class="px-2 sm:px-4 py-2 border text-left">Unit</th>
-                                    <th class="px-2 sm:px-4 py-2 border text-right">Rate</th>
-                                    <th class="px-2 sm:px-4 py-2 border text-right">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($sale->items as $i => $item)
-                                <tr>
-                                    <td class="px-2 sm:px-4 py-2 border">{{ $i+1 }}</td>
-                                    <td class="px-2 sm:px-4 py-2 border">{{ $item->product->name ?? '-' }}</td>
-                                    <td class="px-2 sm:px-4 py-2 border text-right amount">{{ number_format($item->quantity, 2) }}</td>
-                                    <td class="px-2 sm:px-4 py-2 border">{{ $item->unit->name ?? '-' }}</td>
-                                    <td class="px-2 sm:px-4 py-2 border text-right amount">{{ number_format($item->rate, 2) }}</td>
-                                    <td class="px-2 sm:px-4 py-2 border text-right amount">{{ number_format($item->total_amount, 2) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <!-- Invoice Details -->
+                    <div class="p-4 flex justify-between items-center divide-x divide-gray-200">
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-600 px-4">{{ date('d-m-y', strtotime($sale->sale_date)) }}</span>
+                            <span class="text-sm text-gray-600 px-4 border-l border-gray-200">{{ $sale->customer->name ?? '-' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-bold text-gray-600 px-4">Rs. {{ number_format($sale->net_amount ?? $sale->total_amount ?? 0, 2) }}</span>
+                        </div>
                     </div>
                 </div>
             @empty
-                <div class="text-center py-8 text-gray-400 text-xs">No sales found.</div>
+                <div class="text-center py-8 text-sm text-gray-500 bg-gray-50 rounded-lg border border-gray-100">
+                    No sales found.
+                </div>
             @endforelse
         </div>
         <div class="mt-4">

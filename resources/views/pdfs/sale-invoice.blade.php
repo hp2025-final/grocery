@@ -1,154 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>    <title>Sale Invoice #{{ $sale->sale_number }}</title>
-    @include('components.pdf-styles')
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Invoice</title>
     <style>
         body {
-            font-family: sans-serif;
-            font-size: 10pt;
+            font-family: 'DejaVu Sans', sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            font-size: 12px;
+            color: #333;
         }
         .container {
-            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
-        .header {
-            border-bottom: 2px solid #2563eb;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .company-name {
-            font-size: 24pt;
-            color: #2563eb;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .invoice-title {
-            font-size: 16pt;
-            color: #4b5563;
-            margin-bottom: 5px;
-        }
-        .invoice-number {
-            color: #6b7280;
-            font-size: 10pt;
-        }
-        .info-grid {
-            display: table;
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        .info-grid .col {
-            display: table-cell;
-            width: 33.33%;
-            vertical-align: top;
-        }
-        .label {
-            color: #6b7280;
-            font-size: 9pt;
-            margin-bottom: 3px;
-        }
-        .value {
-            color: #111827;
-            font-size: 10pt;
-            margin-bottom: 10px;
-        }
-        table.items {
+        .header-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
         }
-        table.items th {
-            background-color: #f3f4f6;
-            padding: 8px;
+        .header-table td {
+            vertical-align: top;
+            padding: 5px;
+        }
+        .company-info {
             text-align: left;
-            font-size: 9pt;
-            color: #4b5563;
-            border-bottom: 1px solid #e5e7eb;
         }
-        table.items td {
-            padding: 8px;
-            font-size: 9pt;
-            color: #111827;
-            border-bottom: 1px solid #e5e7eb;
+        .invoice-title {
+            text-align: right;
         }
-        .totals {
-            width: 300px;
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .company-address {
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .contact-info {
+            color: #666;
+        }
+        .contact-info span.icon {
+            margin-right: 3px;
+        }
+        .invoice-heading {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .invoice-number {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .customer-grid {
+            width: 100%;
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .customer-grid td {
+            padding: 5px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .items-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .items-table .text-right {
+            text-align: right;
+        }
+        .summary-table {
+            width: 350px;
             float: right;
             margin-bottom: 30px;
         }
-        .totals table {
-            width: 100%;
+        .summary-table td {
+            padding: 5px;
         }
-        .totals table td {
-            padding: 5px 8px;
-            font-size: 9pt;
-        }
-        .totals table td.label {
-            text-align: right;
-            color: #6b7280;
-        }
-        .totals table td.value {
-            text-align: right;
+        .summary-table .total-row {
             font-weight: bold;
-            color: #111827;
-        }
-        .totals table tr.grand-total td {
-            font-size: 11pt;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 10px;
+            border-top: 2px solid #ddd;
         }
         .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
+            clear: both;
+            margin-top: 50px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
             text-align: center;
-            font-size: 9pt;
-            color: #6b7280;
-            border-top: 1px solid #e5e7eb;
+            color: #666;
+        }
+        .signature-section {
+            margin-top: 50px;
+        }
+        .signature-line {
+            width: 200px;
+            border-top: 1px solid #ddd;
+            margin-top: 50px;
+            text-align: center;
+            float: right;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <x-company-info />
-            <div class="invoice-title">SALES INVOICE</div>
-            <div class="invoice-number">#{{ $sale->sale_number }}</div>
-        </div>
+        <!-- Header Section -->
+        <table class="header-table">
+            <tr>
+                <td class="company-info" width="60%">
+                    <div class="company-name">{{ config('company.name') }}</div>
+                    <div class="company-address">{{ config('company.address') }}</div>
+                    <div class="contact-info">
+                        <span class="icon">&#128222;</span>{{ config('company.phone') }}<br>
+                        <span class="icon">&#9993;</span>{{ config('company.email') }}
+                    </div>
+                </td>
+                <td class="invoice-title">
+                    <div class="invoice-heading">SALE INVOICE</div>
+                    <div class="invoice-number">#{{ $sale->sale_number }}</div>
+                    <div>Date: {{ date('d-M-Y', strtotime($sale->sale_date)) }}</div>
+                </td>
+            </tr>
+        </table>
 
-        <!-- Info Grid -->
-        <div class="info-grid">
-            <div class="col">
-                <div class="label">Bill To:</div>
-                <div class="value">{{ $sale->customer->name }}</div>
-                @if($sale->customer->phone)
-                <div class="value">{{ $sale->customer->phone }}</div>
-                @endif
-            </div>
-            <div class="col">
-                <div class="label">Invoice Date:</div>
-                <div class="value">{{ date('d M Y', strtotime($sale->sale_date)) }}</div>
-                @if($sale->notes)
-                <div class="label">Notes:</div>
-                <div class="value">{{ $sale->notes }}</div>
-                @endif
-            </div>
-        </div>
+        <!-- Customer Information -->
+        <table class="customer-grid">
+            <tr>
+                <td width="15%"><strong>Customer:</strong></td>
+                <td width="35%">{{ $sale->customer->name }}</td>
+                <td width="15%"><strong>Phone:</strong></td>
+                <td width="35%">{{ $sale->customer->phone }}</td>
+            </tr>
+            <tr>
+                <td><strong>Address:</strong></td>
+                <td colspan="3">{{ $sale->customer->address }}</td>
+            </tr>
+        </table>
 
         <!-- Items Table -->
-        <table class="items">
+        <table class="items-table">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Item</th>
-                    <th>Unit</th>
-                    <th style="text-align: right">Quantity</th>
-                    <th style="text-align: right">Rate</th>
-                    <th style="text-align: right">Amount</th>
+                    <th width="5%">#</th>
+                    <th width="35%">Product</th>
+                    <th width="15%">Quantity</th>
+                    <th width="15%">Unit</th>
+                    <th width="15%" class="text-right">Rate</th>
+                    <th width="15%" class="text-right">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,39 +169,53 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $item->product->name }}</td>
-                    <td>{{ $item->unit->name ?? '' }}</td>
-                    <td style="text-align: right">{{ number_format($item->quantity, 2) }}</td>
-                    <td style="text-align: right">{{ number_format($item->rate, 2) }}</td>
-                    <td style="text-align: right">{{ number_format($item->total_amount, 2) }}</td>
+                    <td>{{ number_format($item->quantity, 2) }}</td>
+                    <td>{{ $item->unit->abbreviation }}</td>
+                    <td class="text-right">{{ number_format($item->rate, 2) }}</td>
+                    <td class="text-right">{{ number_format($item->total_amount, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
 
-        <!-- Totals -->
-        <div class="totals">
-            <table>
-                <tr>
-                    <td class="label">Sub Total:</td>
-                    <td class="value">{{ number_format($sale->total_amount, 2) }}</td>
-                </tr>
-                @if($sale->discount_amount > 0)
-                <tr>
-                    <td class="label">Discount:</td>
-                    <td class="value">{{ number_format($sale->discount_amount, 2) }}</td>
-                </tr>
-                @endif
-                <tr class="grand-total">
-                    <td class="label">Total:</td>
-                    <td class="value">{{ number_format($sale->net_amount, 2) }}</td>
-                </tr>
-            </table>
+        <!-- Summary Section -->
+        <table class="summary-table">
+            <tr>
+                <td><strong>Subtotal:</strong></td>
+                <td class="text-right">{{ number_format($sale->total_amount, 2) }}</td>
+            </tr>
+            @if($sale->discount_amount > 0)
+            <tr>
+                <td><strong>Discount:</strong></td>
+                <td class="text-right">{{ number_format($sale->discount_amount, 2) }}</td>
+            </tr>
+            @endif
+            <tr class="total-row">
+                <td><strong>Net Total:</strong></td>
+                <td class="text-right">{{ number_format($sale->net_amount, 2) }}</td>
+            </tr>
+        </table>
+
+        <!-- Notes Section -->
+        @if($sale->notes)
+        <div style="clear: both; margin-bottom: 30px;">
+            <strong>Notes:</strong><br>
+            {{ $sale->notes }}
+        </div>
+        @endif
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-line">
+                Authorized Signature
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            {{ config('company.powered_by') }}<br>
+            Thank you for your business!
         </div>
     </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        Thank you for your business!
-    </div>
 </body>
-</html> 
+</html>

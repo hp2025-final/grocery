@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
 class PurchasesController extends Controller {
     public function index(Request $request) {
         $query = \App\Models\Purchase::with('vendor');
@@ -41,6 +43,13 @@ class PurchasesController extends Controller {
         
         $pdf = \PDF::loadView('pdfs.purchase-invoice', compact('purchase'));
         
-        return $pdf->download('invoice-' . $purchase->purchase_number . '.pdf');
+        $filename = sprintf(
+            'invoice-%s-%s-%s.pdf',
+            Str::slug($purchase->vendor->name),
+            $purchase->purchase_number,
+            date('Y-m-d', strtotime($purchase->purchase_date))
+        );
+        
+        return $pdf->download($filename);
     }
 }

@@ -18,7 +18,9 @@ class SaleController extends Controller {
     ];
 })->values()->toArray();
         $search = $request->input('search');
-        $salesQuery = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])->orderByDesc('sale_date');
+        $salesQuery = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])
+            ->orderByDesc('sale_date')
+            ->take(50); // Limit to last 50 invoices
         if ($search) {
             $salesQuery->where(function($q) use ($search) {
                 $q->where('sale_number', 'like', "%$search%")
@@ -27,7 +29,7 @@ class SaleController extends Controller {
                   });
             });
         }
-        $sales = $salesQuery->paginate(5)->withQueryString();
+        $sales = $salesQuery->paginate(10)->withQueryString();
         return view('sales.create', compact('customers', 'products', 'sales', 'search'));
     }
 
@@ -43,9 +45,11 @@ class SaleController extends Controller {
     ];
 })->values()->toArray();
 
-        // Add paginated sales list
+        // Add paginated sales list limited to last 50 records
         $search = request()->input('search');
-        $salesQuery = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])->orderByDesc('sale_date');
+        $salesQuery = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])
+            ->orderByDesc('sale_date')
+            ->take(50); // Limit to last 50 invoices
         if ($search) {
             $salesQuery->where(function($q) use ($search) {
                 $q->where('sale_number', 'like', "%$search%")
@@ -54,7 +58,7 @@ class SaleController extends Controller {
                   });
             });
         }
-        $sales = $salesQuery->paginate(5)->withQueryString();
+        $sales = $salesQuery->paginate(10)->withQueryString();
 
         // Map the sale items to match the expected format
         $saleItems = $sale->items->map(function($item) {
@@ -437,5 +441,10 @@ class SaleController extends Controller {
         // --- End Update Journal Entries ---
 
         return redirect()->route('sales.edit', $sale->id)->with('success', 'Sale updated successfully!');
+    }
+
+    public function show($id) {
+        $sale = Sale::with(['customer', 'items.product', 'items.unit'])->findOrFail($id);
+        return view('sales.invoice', compact('sale'));
     }
 }

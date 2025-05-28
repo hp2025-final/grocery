@@ -362,4 +362,9 @@ class PurchaseController extends Controller {
 
         return redirect()->route('purchases.create')->with('success', 'Purchase created successfully!');
     }
+
+    public function show($id) {
+        $purchase = \App\Models\Purchase::with(['vendor', 'items.product', 'items.unit'])->findOrFail($id);
+        return view('purchases.show', compact('purchase'));
+    }
 }

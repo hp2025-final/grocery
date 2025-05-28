@@ -39,8 +39,15 @@ class SalesController extends Controller {
     {
         $sale = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])->findOrFail($id);
         
-        $pdf = \PDF::loadView('pdfs.sale-invoice', compact('sale'));
+        $pdf = \PDF::loadView('pdfs.sale-invoice-new', compact('sale'));
         
-        return $pdf->download('invoice-' . $sale->sale_number . '.pdf');
+        $filename = sprintf(
+            'invoice-%s-%s-%s.pdf',
+            \Str::slug($sale->customer->name),
+            $sale->sale_number,
+            date('Y-m-d', strtotime($sale->sale_date))
+        );
+        
+        return $pdf->download($filename);
     }
 }
