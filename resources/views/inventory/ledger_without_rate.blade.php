@@ -5,7 +5,7 @@
         <div>
             <h1 class="text-2xl font-bold mb-1 text-left">{{ $inventory->name ?? $inventory->title ?? 'N/A' }} ({{ $inventory->inventory_code ?? $inventory->code ?? $inventory->id }})</h1>
         </div>
-        <div class="text-xl font-semibold text-gray-700 text-right">Inventory Ledger</div>
+        <div class="text-xl font-semibold text-gray-700 text-right">Inventory Ledger w/o Rate</div>
     </div>
     <hr class="mb-4 border-gray-300">
 
@@ -21,7 +21,7 @@
             </div>
             <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition h-8 text-xs">Filter</button>
         </form>
-        <a href="{{ route('inventory.ledger.export', ['id' => $inventory->id, 'from' => $from, 'to' => $to]) }}"
+        <a href="{{ route('inventory.ledger.without_rate.export', ['id' => $inventory->id, 'from' => $from, 'to' => $to]) }}"
            class="px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition flex items-center gap-2 h-8 text-xs whitespace-nowrap">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -35,11 +35,10 @@
             <thead class="bg-blue-50">
                 <tr>
                     <th class="px-3 py-2 font-bold w-[10%] text-center border border-gray-200">Date</th>
-                    <th class="px-3 py-2 font-bold w-[40%] border border-gray-200">Party</th>
-                    <th class="px-3 py-2 font-bold w-[10%] text-center border border-gray-200">In</th>
-                    <th class="px-3 py-2 font-bold w-[10%] text-center border border-gray-200">Out</th>
-                    <th class="px-3 py-2 font-bold w-[15%] text-center border border-gray-200">Balance</th>
-                    <th class="px-3 py-2 font-bold w-[15%] text-center border border-gray-200">Rate</th>
+                    <th class="px-3 py-2 font-bold w-[50%] border border-gray-200">Party</th>
+                    <th class="px-3 py-2 font-bold w-[15%] text-center border border-gray-200">In</th>
+                    <th class="px-3 py-2 font-bold w-[15%] text-center border border-gray-200">Out</th>
+                    <th class="px-3 py-2 font-bold w-[20%] text-center border border-gray-200">Balance</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,11 +49,10 @@
                     <td class="px-3 py-1.5 text-center border border-gray-200">{{ isset($row['in']) && $row['in'] !== null ? number_format($row['in'], 0) : '' }}</td>
                     <td class="px-3 py-1.5 text-center border border-gray-200">{{ isset($row['out']) && $row['out'] !== null ? number_format($row['out'], 0) : '' }}</td>
                     <td class="px-3 py-1.5 text-center border border-gray-200">{{ isset($row['balance']) ? number_format($row['balance'], 0) : '' }}</td>
-                    <td class="px-3 py-1.5 text-center border border-gray-200">{{ isset($row['rate']) && $row['rate'] !== null ? number_format($row['rate'], 0) : '' }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-gray-500 border border-gray-200">No data found for this inventory and date range.</td>
+                    <td colspan="5" class="text-center py-4 text-gray-500 border border-gray-200">No data found for this inventory and date range.</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -34,13 +34,18 @@
             <!-- Mobile View (Cards) -->
             <div class="block sm:hidden space-y-2">
                 @foreach($inventory as $item)
-                <div class="bg-white border rounded-lg p-3 shadow-sm">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="bg-white border rounded-lg p-3 shadow-sm">                    <div class="flex justify-between items-start mb-2">
                         <div class="font-medium text-gray-900">{{ $item->name }}</div>
-                        <a href="{{ url('/inventory/' . $item->id . '/ledger') }}" class="inline-block px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition" title="Ledger">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-                            Ledger
-                        </a>
+                        <div class="flex flex-col gap-1">
+                            <a href="{{ url('/inventory/' . $item->id . '/ledger') }}" class="inline-block px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition" title="Ledger">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                Ledger
+                            </a>
+                            <a href="{{ url('/inventory/' . $item->id . '/ledger-without-rate') }}" class="inline-block px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition" title="Ledger without Rate">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                Ledger w/o R
+                            </a>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div>
@@ -54,9 +59,8 @@
                         <div>
                             <div class="text-gray-500">Out</div>
                             <div class="font-medium">{{ number_format($item->period_out, 2) }} {{ $item->unit }}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-500">Balance</div>
+                        </div>                        <div>
+                            <div class="text-gray-500">Closing</div>
                             <div class="font-medium">{{ number_format($item->closing_balance, 2) }} {{ $item->unit }}</div>
                         </div>
                     </div>
@@ -77,9 +81,8 @@
                         <div>
                             <div class="text-gray-500">Out</div>
                             <div class="font-medium">{{ number_format($inventory->sum('period_out'), 2) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-gray-500">Balance</div>
+                        </div>                        <div>
+                            <div class="text-gray-500">Closing</div>
                             <div class="font-medium">{{ number_format($inventory->sum('closing_balance'), 2) }}</div>
                         </div>
                     </div>
@@ -90,14 +93,12 @@
             <div class="hidden sm:block">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Opening Balance</th>
+                        <thead class="bg-gray-50">                            <tr>
+                                <th class="px-3 py-2 text-left text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Opening</th>
                                 <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">In</th>
-                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Out</th>
-                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Closing Balance</th>
-                                <th class="px-3 py-2 text-center text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">View</th>
+                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Out</th>                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Closing</th>
+                                <th class="px-3 py-2 text-center text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -107,12 +108,17 @@
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->opening_balance, 2) }} {{ $item->unit }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->period_in, 2) }} {{ $item->unit }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->period_out, 2) }} {{ $item->unit }}</td>
-                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->closing_balance, 2) }} {{ $item->unit }}</td>
-                                <td class="px-3 py-2 text-center">
-                                    <a href="{{ url('/inventory/' . $item->id . '/ledger') }}" class="inline-block px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition" title="Ledger">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-                                        Ledger
-                                    </a>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->closing_balance, 2) }} {{ $item->unit }}</td>                                <td class="px-3 py-2 text-center">
+                                    <div class="flex flex-col space-y-2 justify-center items-center">
+                                        <a href="{{ url('/inventory/' . $item->id . '/ledger') }}" class="inline-block px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition w-full text-center" title="Ledger">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                            Ledger
+                                        </a>
+                                        <a href="{{ url('/inventory/' . $item->id . '/ledger-without-rate') }}" class="inline-block px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-semibold transition w-full text-center" title="Ledger without Rate">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                            Ledger w/o R
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach

@@ -67,10 +67,11 @@ class InventoryBalancesController extends Controller
                     'id' => $item->id,
                     'name' => $item->name,
                     'unit' => $item->unit,
-                    'opening_balance' => $opening_balance,
-                    'period_in' => $item->period_in,
-                    'period_out' => $item->period_out,
-                    'closing_balance' => $opening_balance + $item->period_in - $item->period_out
+                    'opening_balance' => is_numeric($opening_balance) ? $opening_balance : 0,
+                    'period_in' => is_numeric($item->period_in) ? $item->period_in : 0,
+                    'period_out' => is_numeric($item->period_out) ? $item->period_out : 0,
+                    'closing_balance' => is_numeric($opening_balance) && is_numeric($item->period_in) && is_numeric($item->period_out) ? 
+                        ($opening_balance + $item->period_in - $item->period_out) : 0
                 ];
             });
 
@@ -138,10 +139,11 @@ class InventoryBalancesController extends Controller
                     'id' => $item->id,
                     'name' => $item->name,
                     'unit' => $item->unit,
-                    'opening_balance' => $opening_balance,
-                    'period_in' => $item->period_in,
-                    'period_out' => $item->period_out,
-                    'closing_balance' => $opening_balance + $item->period_in - $item->period_out
+                    'opening_balance' => is_numeric($opening_balance) ? $opening_balance : 0,
+                    'period_in' => is_numeric($item->period_in) ? $item->period_in : 0,
+                    'period_out' => is_numeric($item->period_out) ? $item->period_out : 0,
+                    'closing_balance' => is_numeric($opening_balance) && is_numeric($item->period_in) && is_numeric($item->period_out) ? 
+                        ($opening_balance + $item->period_in - $item->period_out) : 0
                 ];
             });
 
@@ -153,4 +155,4 @@ class InventoryBalancesController extends Controller
 
         return $pdf->download('inventory-balances-' . $from . '-to-' . $to . '.pdf');
     }
-} 
+}
