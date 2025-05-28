@@ -47,7 +47,7 @@
             <tbody class="divide-y">
                 @forelse($rows as $row)
                     <tr class="odd:bg-gray-50 even:bg-white">
-                        <td class="px-3 py-1.5 text-center border border-gray-200">{{ $row['date'] }}</td>
+                        <td class="px-3 py-1.5 text-center border border-gray-200">{{ \Carbon\Carbon::parse($row['date'])->format('d-m-Y') }}</td>
                         <td class="px-3 py-1.5 align-top border border-gray-200">
                             @if (!empty($row['sale_items']))
                                 <div class="text-xs text-gray-700 mt-1 space-y-0.5">

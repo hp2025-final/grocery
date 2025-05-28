@@ -161,9 +161,8 @@
                 <th class="col-balance text-right">Balance</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach($rows as $row)                <tr @if($row['type'] == 'Opening balance') class="opening-row" @endif>
-                    <td>{{ $row['date'] }}</td>
+        <tbody>            @foreach($rows as $row)                <tr @if($row['type'] == 'Opening balance') class="opening-row" @endif>
+                    <td>{{ \Carbon\Carbon::parse($row['date'])->format('d-m-Y') }}</td>
                     <td>
                         @if (!empty($row['sale_items']))
                             <div style="font-size: 7pt; color: #666;">
