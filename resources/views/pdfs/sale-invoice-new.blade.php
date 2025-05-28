@@ -194,10 +194,9 @@
             @foreach($sale->items as $index => $item)
             <tr>
                 <td>{{ $index + 1 }}</td>
-                <td>{{ $item->product->name }}</td>
-                <td>{{ $item->quantity }} {{ $item->product->unit }}</td>
-                <td class="amount-cell">Rs. {{ number_format($item->unit_price, 2) }}</td>
-                <td class="amount-cell">Rs. {{ number_format($item->quantity * $item->unit_price, 2) }}</td>
+                <td>{{ $item->product->name }}</td>                <td>{{ $item->quantity }} {{ $item->product->unit }}</td>
+                <td class="amount-cell">Rs. {{ number_format($item->rate, 2) }}</td>
+                <td class="amount-cell">Rs. {{ number_format($item->total_amount, 2) }}</td>
             </tr>
             @endforeach
     </tbody>

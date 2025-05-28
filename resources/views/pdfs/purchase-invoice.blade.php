@@ -188,7 +188,7 @@
                 <td>{{ $item->product->name }}</td>
                 <td>{{ number_format($item->quantity, 2) }} {{ $item->unit->name ?? '' }}</td>
                 <td class="amount-cell">Rs. {{ number_format($item->rate, 2) }}</td>
-                <td class="amount-cell">Rs. {{ number_format($item->total_amount, 2) }}</td>
+                <td class="amount-cell">Rs. {{ number_format($item->amount, 2) }}</td>
             </tr>
             @endforeach
         </tbody>

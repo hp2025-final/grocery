@@ -12,17 +12,25 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
-        }
-        table {
+        }        table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed;
         }
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-        }
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }        /* Column widths */
+        .col-date { width: 10%; }
+        .col-desc { width: 50%; }
+        .col-debit { width: 13%; }
+        .col-credit { width: 13%; }
+        .col-balance { width: 14%; }
         th {
             background-color: #f8f9fa;
         }
@@ -58,24 +66,18 @@
     </div>
 
     <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>Notes</th>
-                <th class="text-right">Debit</th>
-                <th class="text-right">Credit</th>
-                <th class="text-right">Balance</th>
+        <thead>            <tr>
+                <th class="col-date">Date</th>
+                <th class="col-desc">Description</th>
+                <th class="col-debit text-right">Debit</th>
+                <th class="col-credit text-right">Credit</th>
+                <th class="col-balance text-right">Balance</th>
             </tr>
         </thead>
         <tbody>
             @foreach($transactions as $transaction)
-            <tr>
-                <td>{{ $transaction['date'] }}</td>
-                <td>{{ $transaction['type'] }}</td>
+            <tr>                <td>{{ $transaction['date'] }}</td>
                 <td>{{ $transaction['description'] }}</td>
-                <td>{{ $transaction['notes'] }}</td>
                 <td class="text-right">{{ $transaction['debit'] }}</td>
                 <td class="text-right">{{ $transaction['credit'] }}</td>
                 <td class="text-right">{{ $transaction['balance'] }}</td>

@@ -40,18 +40,26 @@
             margin-bottom: 10px;
         }
         .company-name {
-            font-size: 16pt;
+            font-size: 36px;
             font-weight: bold;
+            color: #000000;
+        }
+        .company-details, .company-contacts {
+            font-size: 16px;
         }
         .report-title {
             font-size: 10pt;
             font-weight: bold;
             margin-top: 5px;
+            text-align: right;
+            float: right;
+            margin-right: 0;
         }
         .customer-details {
             text-align: right;
             float: right;
-            margin-top: -50px;
+            clear: right;
+            margin-top: 5px;
         }
         .filters { 
             margin: 15px 0 10px 0;
@@ -62,18 +70,20 @@
         }
         .opening-row { 
             background: #fff9c2; 
-        }
-        .footer {
+        }        .footer {
             position: fixed;
             bottom: 5mm;
             left: 0;
             right: 0;
-            height: 20px;
+            height: auto;
             text-align: center;
             font-size: 7pt;
             color: #666;
             padding: 5px;
             border-top: 0.5px solid #ddd;
+        }
+        .footer .footer-address {
+            margin-bottom: 3px;
         }
         .footer .developer {
             font-style: italic;
@@ -87,10 +97,23 @@
         }
         /* Column widths */
         .col-date { width: 10%; }
-        .col-type { width: 10%; }
-        .col-desc { width: 30%; }
-        .col-notes { width: 20%; }
-        .col-amount { width: 10%; }
+        .col-desc { width: 50%; }
+        .col-debit { width: 13%; }
+        .col-credit { width: 13%; }
+        .col-balance { width: 14%; }
+        /* Center align cells */
+        .table td { 
+            text-align: center;
+        }
+        .table td:nth-child(2) { /* Description column */
+            text-align: left;
+        }
+        .table th {
+            text-align: center;
+        }
+        .table th:nth-child(2) { /* Description header */
+            text-align: left;
+        }
         @page {
             margin: 5mm 5mm 15mm 5mm;
         }
@@ -101,18 +124,23 @@
         }
     </style>
 </head>
-<body>
-    <div class="header-section">
-        <div class="company-section">
-            <x-company-info />
-            <div class="report-title">Customer Ledger</div>
-        </div>
-        <div class="customer-details">
-            {{ $customer->name }}<br>
-            @if($customer->phone)
-                Phone: {{ $customer->phone }}
-            @endif
-        </div>
+<body>    <div class="header-section">
+        <table width="100%" style="border-collapse: collapse; margin-bottom: 10px;">
+            <tr>
+                <td style="width: 60%; vertical-align: top;">
+                    <x-customer-ledger-company-info />
+                </td>
+                <td style="width: 40%; text-align: right; vertical-align: bottom; padding-bottom: 5px;">
+                    <div style="font-size:24px; font-weight:bold; color:#222;">Customer Ledger</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+      <hr style="border: 0; height: 1px; background-color: #ddd; margin: 25px 0 25px 0;">
+
+    <div class="customer-info" style="margin-bottom: 15px;">
+        <div style="font-size: 14px; font-weight: bold;">Customer Name: {{ $customer->name }}</div>
+        <div style="font-size: 10px; font-style: bold;">Customer Phone: {{ $customer->phone }}</div>
     </div>
 
     <div class="filters">
@@ -125,31 +153,25 @@
     </div>
 
     <table class="table">
-        <thead>
-            <tr>
+        <thead>            <tr>
                 <th class="col-date">Date</th>
-                <th class="col-type">Type</th>
                 <th class="col-desc">Description</th>
-                <th class="col-notes">Notes</th>
-                <th class="col-amount text-right">Debit</th>
-                <th class="col-amount text-right">Credit</th>
-                <th class="col-amount text-right">Balance</th>
+                <th class="col-debit text-right">Debit</th>
+                <th class="col-credit text-right">Credit</th>
+                <th class="col-balance text-right">Balance</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($rows as $row)
-                <tr @if($row['type'] == 'Opening balance') class="opening-row" @endif>
+            @foreach($rows as $row)                <tr @if($row['type'] == 'Opening balance') class="opening-row" @endif>
                     <td>{{ $row['date'] }}</td>
-                    <td>{{ $row['type'] }}</td>
                     <td>
                         @if (!empty($row['sale_items']))
                             <div style="font-size: 7pt; color: #666;">
-                                @foreach($row['sale_items'] as $item)
-                                    <div>
+                                @foreach($row['sale_items'] as $item)                                    <div>
                                         {{ $item['product'] }}
                                         @if($item['qty'] !== '') ({{ $item['qty'] }} {{ $item['unit'] }}) @endif
-                                        @if($item['rate'] !== '') x {{ is_numeric($item['rate']) ? number_format($item['rate'],2) : $item['rate'] }} @endif
-                                        = {{ is_numeric($item['total']) ? number_format($item['total'],2) : $item['total'] }}
+                                        @if($item['rate'] !== '') x {{ is_numeric($item['rate']) ? number_format($item['rate'],0) : $item['rate'] }} @endif
+                                        = {{ is_numeric($item['total']) ? number_format($item['total'],0) : $item['total'] }}
                                     </div>
                                 @endforeach
                             </div>
@@ -161,21 +183,18 @@
                                 @endif
                                 @if(!empty($row['receipt_reference']))
                                     Reference: {{ $row['receipt_reference'] }}
-                                @endif
-                            </div>
+                                @endif                            </div>
                         @else
                             {{ $row['description'] }}
-                        @endif
-                    </td>
-                    <td>{{ $row['notes'] ?? '' }}</td>
-                    <td class="text-right">{{ number_format($row['debit'], 2) }}</td>
-                    <td class="text-right">{{ number_format($row['credit'], 2) }}</td>
-                    <td class="text-right">{{ number_format($row['balance'], 2) }}</td>
+                        @endif                    </td>
+                    <td class="text-right">{{ number_format($row['debit'], 0) }}</td>
+                    <td class="text-right">{{ number_format($row['credit'], 0) }}</td>
+                    <td class="text-right">{{ number_format($row['balance'], 0) }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>    <div class="footer">
-        <x-company-info :showPoweredBy="true" />
+        <x-customer-ledger-footer-info :showPoweredBy="true" />
     </div>
 
     <script type="text/php">
