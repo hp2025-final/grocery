@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerBalancesController;
 use App\Http\Controllers\CustomerController;
@@ -13,15 +14,18 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware(['auth', 'web'])->group(function () {
-    Route::get('/dashboard/kpis', [App\Http\Controllers\DashboardController::class, 'kpis'])->name('dashboard.kpis');
-    Route::get('/dashboard/journal-entries', [App\Http\Controllers\DashboardController::class, 'journalEntries'])->name('dashboard.journal-entries');
-    Route::get('/dashboard/sale-chart', [App\Http\Controllers\DashboardController::class, 'saleChart'])->name('dashboard.sale-chart');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Protected routes that require permissions
+Route::middleware(['auth', 'verified', 'permission'])->group(function () {
+    Route::get('/dashboard/kpis', [App\Http\Controllers\DashboardController::class, 'kpis'])->name('dashboard.kpis');
+    Route::get('/dashboard/journal-entries', [App\Http\Controllers\DashboardController::class, 'journalEntries'])->name('dashboard.journal-entries');
+    Route::get('/dashboard/sale-chart', [App\Http\Controllers\DashboardController::class, 'saleChart'])->name('dashboard.sale-chart');
 
     Route::get('/expenses/table', [App\Http\Controllers\ExpensesController::class, 'tableAjax'])->name('expenses.tableAjax');
 
@@ -131,6 +135,15 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::get('/inventory-values/export-pdf', [InventoryValuesController::class, 'exportPdf'])->name('inventory-values.export-pdf');
     Route::get('/inventory-values/info', [InventoryValuesController::class, 'downloadInfo'])->name('inventory-values.info');
 
+    // Admin Routes
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'permission'])->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('index');
+        Route::get('/sales-form-copy', [App\Http\Controllers\AdminController::class, 'salesFormCopy'])->name('sales-form-copy');
+        Route::get('/purchase-form-copy', [App\Http\Controllers\AdminController::class, 'purchaseFormCopy'])->name('purchase-form-copy');
+        Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+        Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+        Route::get('/permissions/{email}', [PermissionController::class, 'getUserPermissionsByEmail'])->name('permissions.get');
+    });
 });
 
 // Reports UI
@@ -142,14 +155,13 @@ Route::middleware(['auth', 'verified'])->prefix('reports')->group(function () {
     Route::get('/balance-sheet', [App\Http\Controllers\ReportsController::class, 'balanceSheet'])->name('reports.balance_sheet');
 });
 
-// Include inventory categories routes
-require __DIR__.'/inventory_categories.php';
-// Include inventory ledger route
-require __DIR__.'/inventory_ledger.php';
-// Include customer ledger route
-require __DIR__.'/customer_ledger.php';
-// Include vendor ledger route
-require __DIR__.'/vendor_ledger.php';
+// Include other route files that should be protected
+Route::middleware(['auth', 'verified', 'permission'])->group(function () {
+    require __DIR__.'/inventory_categories.php';
+    require __DIR__.'/inventory_ledger.php';
+    require __DIR__.'/customer_ledger.php';
+    require __DIR__.'/vendor_ledger.php';
+});
 
 // Include auth routes
 require __DIR__.'/auth.php';

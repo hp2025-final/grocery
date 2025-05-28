@@ -225,6 +225,42 @@
             </ul>
         </li>
 
+        <!-- Admin Section -->
+        <li class="mt-4">
+            <button @click="activeSection = activeSection === 'admin' ? null : 'admin'" class="flex items-center w-full px-3 py-2 rounded hover:bg-gray-100 font-medium text-gray-700 focus:outline-none focus:bg-gray-100">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="uppercase text-xs text-gray-400 font-bold tracking-wider flex-1 text-left">Admin</span>
+                <svg :class="{'transform rotate-90': activeSection === 'admin'}" class="h-4 w-4 ml-2 text-gray-500 transition-transform duration-200" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l6 6-6 6" />
+                </svg>
+            </button>
+            <ul class="space-y-1 mt-1 pl-3 border-l border-gray-100" x-show="activeSection === 'admin'" x-transition>
+                <li>
+                    <a href="{{ route('admin.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.index') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        Admin Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.sales-form-copy') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.sales-form-copy') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        Sales Form Copy
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.purchase-form-copy') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.purchase-form-copy') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        Purchase Form Copy
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.permissions.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.permissions.index') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        User Permissions
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Logout Button -->
         <li class="mt-8 pt-6 border-t border-gray-100">
             <form method="POST" action="{{ route('logout') }}">

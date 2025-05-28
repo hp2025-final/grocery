@@ -360,6 +360,9 @@ class PurchaseController extends Controller {
         });
         // --- End Journal Entry ---
 
+        if ($request->input('from_admin_copy')) {
+            return redirect()->route('admin.purchase-form-copy')->with('success', 'Purchase created successfully!');
+        }
         return redirect()->route('purchases.create')->with('success', 'Purchase created successfully!');
     }
 
