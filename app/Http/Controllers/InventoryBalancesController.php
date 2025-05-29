@@ -16,8 +16,9 @@ class InventoryBalancesController extends Controller
         $today = date('Y-m-d');
         $from = $request->input('from', $today);
         $to = $request->input('to', $today);
+        $search = $request->input('search');
 
-        $inventory = DB::table('inventories')
+        $query = DB::table('inventories')
             ->select([
                 'inventories.id',
                 'inventories.name',
@@ -57,8 +58,14 @@ class InventoryBalancesController extends Controller
                     AND s.sale_date >= "' . $from . '"
                     AND s.sale_date <= "' . $to . '"
                 ), 0) as period_out')
-            ])
-            ->get()
+            ]);
+
+        // Apply search filter if provided
+        if ($search) {
+            $query->where('inventories.name', 'LIKE', '%' . $search . '%');
+        }
+
+        $inventory = $query->get()
             ->map(function ($item) {
                 // Calculate real opening balance including historical transactions
                 $opening_balance = ($item->opening_qty ?? 0) + $item->historical_in - $item->historical_out;
@@ -68,8 +75,7 @@ class InventoryBalancesController extends Controller
                     'name' => $item->name,
                     'unit' => $item->unit,
                     'opening_balance' => is_numeric($opening_balance) ? $opening_balance : 0,
-                    'period_in' => is_numeric($item->period_in) ? $item->period_in : 0,
-                    'period_out' => is_numeric($item->period_out) ? $item->period_out : 0,
+                    'period_in' => is_numeric($item->period_in) ? $item->period_in : 0,                    'period_out' => is_numeric($item->period_out) ? $item->period_out : 0,
                     'closing_balance' => is_numeric($opening_balance) && is_numeric($item->period_in) && is_numeric($item->period_out) ? 
                         ($opening_balance + $item->period_in - $item->period_out) : 0
                 ];
@@ -88,8 +94,9 @@ class InventoryBalancesController extends Controller
         $today = date('Y-m-d');
         $from = $request->input('from', $today);
         $to = $request->input('to', $today);
+        $search = $request->input('search');
 
-        $inventory = DB::table('inventories')
+        $query = DB::table('inventories')
             ->select([
                 'inventories.id',
                 'inventories.name',
@@ -129,8 +136,14 @@ class InventoryBalancesController extends Controller
                     AND s.sale_date >= "' . $from . '"
                     AND s.sale_date <= "' . $to . '"
                 ), 0) as period_out')
-            ])
-            ->get()
+            ]);
+
+        // Apply search filter if provided
+        if ($search) {
+            $query->where('inventories.name', 'LIKE', '%' . $search . '%');
+        }
+
+        $inventory = $query->get()
             ->map(function ($item) {
                 // Calculate real opening balance including historical transactions
                 $opening_balance = ($item->opening_qty ?? 0) + $item->historical_in - $item->historical_out;

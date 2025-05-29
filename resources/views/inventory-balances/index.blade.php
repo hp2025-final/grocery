@@ -6,7 +6,13 @@
         <div class="p-4">
             <h2 class="text-lg font-semibold mb-4">Inventory Balances</h2>
 
-            <form action="{{ route('inventory-balances.index') }}" method="GET" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+            <form action="{{ route('inventory-balances.index') }}" method="GET" class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Search:</label>
+                    <input type="text" name="search" value="{{ request('search') }}" 
+                           placeholder="Search by name..."
+                           class="w-full border-gray-300 rounded text-sm px-2 py-1">
+                </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">From:</label>
                     <input type="date" name="from" value="{{ request('from') }}" 
@@ -24,7 +30,7 @@
                     </button>
                 </div>
                 <div class="flex items-end">
-                    <a href="{{ route('inventory-balances.export', ['from' => request('from'), 'to' => request('to')]) }}" 
+                    <a href="{{ route('inventory-balances.export', ['from' => request('from'), 'to' => request('to'), 'search' => request('search')]) }}" 
                        class="w-full bg-green-500 text-white px-3 py-1.5 rounded text-sm text-center hover:bg-green-600">
                         Export PDF
                     </a>
@@ -139,4 +145,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
