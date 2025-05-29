@@ -164,9 +164,33 @@ class InventoryController extends Controller {
 
     public function destroy($id)
     {
-        $product = Inventory::findOrFail($id);
-        $product->delete();
-        return back()->with('success', 'Product deleted successfully!');
+        try {
+            DB::beginTransaction();
+            
+            // Find the inventory item
+            $inventory = Inventory::findOrFail($id);
+            
+            // Delete related journal entry lines
+            $journal = JournalEntry::where('reference_type', 'inventory')
+                                 ->where('reference_id', $id)
+                                 ->first();
+            
+            if ($journal) {
+                // Delete journal entry lines first
+                $journal->lines()->delete();
+                // Delete the journal entry
+                $journal->delete();
+            }
+            
+            // Delete the inventory item
+            $inventory->delete();
+            
+            DB::commit();
+            return back()->with('success', 'Product deleted successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to delete product. ' . $e->getMessage()]);
+        }
     }
 }
 
