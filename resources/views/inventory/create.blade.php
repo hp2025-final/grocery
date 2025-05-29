@@ -36,7 +36,20 @@ function inventoryForm() {
         sale_price: '',
         opening_qty: '',
         notes: '',
+        searchTerm: '',
         get total() { return (parseFloat(this.opening_qty || 0) * parseFloat(this.buy_price || 0)).toFixed(2); },
+        get filteredProducts() {
+            const search = this.searchTerm.toLowerCase();
+            return @json($allProducts).filter(product => 
+                product.name.toLowerCase().includes(search) ||
+                product.inventory_code.toLowerCase().includes(search) ||
+                (product.category ? product.category.name.toLowerCase().includes(search) : false) ||
+                product.unit.toLowerCase().includes(search)
+            );
+        },
+        formatNumber(number) {
+            return number ? number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+        },
         createUrl: '{{ route('inventory.store') }}',
         updateUrl: '',
         editProduct(product) {
@@ -143,7 +156,14 @@ function inventoryForm() {
     </form>
         </div>
         <div class="md:w-2/3 w-full">
-            <h2 class="text-xl font-semibold mb-4">All Products</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">All Products</h2>
+                <div class="w-64">
+                    <input type="text" x-model="searchTerm" 
+                           placeholder="Search products..." 
+                           class="w-full border-gray-300 rounded px-3 py-1 text-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 shadow rounded-lg overflow-hidden">
                     <thead class="bg-blue-50">
@@ -159,39 +179,29 @@ function inventoryForm() {
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
-                        @forelse ($allProducts as $i => $product)
+                        <template x-for="(product, index) in filteredProducts" :key="product.id">
                             <tr class="hover:bg-blue-50 transition">
-                                <td class="px-3 py-2 text-center text-sm text-gray-800">{{ $i + 1 }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-800">{{ $product->inventory_code }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-800">{{ $product->name }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-800">{{ optional($product->category)->name }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-800">{{ $product->unit }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-800">{{ number_format($product->buy_price, 2) }}</td>
-                                <td class="px-3 py-2 text-sm text-gray-800">{{ number_format($product->sale_price, 2) }}</td>
+                                <td class="px-3 py-2 text-center text-sm text-gray-800" x-text="index + 1"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="product.inventory_code"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="product.name"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="product.category_name"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="product.unit"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="formatNumber(product.buy_price)"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="formatNumber(product.sale_price)"></td>
                                 <td class="px-3 py-2 text-sm flex gap-2">
-                                    <a href="/inventory/{{ $product->id }}/ledger" class="inline-flex items-center justify-center w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition" title="Ledger">
+                                    <a :href="'/inventory/' + product.id + '/ledger'" class="inline-flex items-center justify-center w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition" title="Ledger">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     </a>
                                     <button type="button"
                                         class="inline-flex items-center justify-center w-8 h-8 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full transition"
                                         title="Edit"
-                                        @click="editProduct({
-                                            id: {{ $product->id }},
-                                            inventory_code: '{{ $product->inventory_code }}',
-                                            name: `{{ addslashes($product->name) }}`,
-                                            category_id: {{ $product->category_id }},
-                                            unit: '{{ $product->unit }}',
-                                            buy_price: {{ $product->buy_price }},
-                                            sale_price: {{ $product->sale_price }},
-                                            opening_qty: {{ $product->opening_qty ?? 0 }},
-                                            notes: `{{ addslashes($product->notes ?? '') }}`
-                                        })">
+                                        @click="editProduct(product)">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </button>
                                     
-                                    <form action="{{ route('inventory.destroy', $product->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                    <form :action="'/inventory/' + product.id" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this product?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="inline-flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full transition" title="Delete">
@@ -202,9 +212,10 @@ function inventoryForm() {
                                     </form>
                                 </td>
                             </tr>
-                        @empty
+                        </template>
+                        <template x-if="filteredProducts.length === 0">
                             <tr><td colspan="8" class="text-center py-4 text-gray-500">No products found.</td></tr>
-                        @endforelse
+                        </template>
                     </tbody>
                 </table>
             </div>
