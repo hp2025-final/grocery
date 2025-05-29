@@ -37,6 +37,8 @@ function inventoryForm() {
         opening_qty: '',
         notes: '',
         searchTerm: '',
+        currentPage: 1,
+        perPage: 10,
         get total() { return (parseFloat(this.opening_qty || 0) * parseFloat(this.buy_price || 0)).toFixed(2); },
         get filteredProducts() {
             const search = this.searchTerm.toLowerCase();
@@ -46,6 +48,24 @@ function inventoryForm() {
                 (product.category ? product.category.name.toLowerCase().includes(search) : false) ||
                 product.unit.toLowerCase().includes(search)
             );
+        },
+        get totalPages() {
+            return Math.ceil(this.filteredProducts.length / this.perPage);
+        },
+        get paginatedProducts() {
+            const start = (this.currentPage - 1) * this.perPage;
+            const end = start + this.perPage;
+            return this.filteredProducts.slice(start, end);
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
         },
         formatNumber(number) {
             return number ? number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
@@ -179,12 +199,12 @@ function inventoryForm() {
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
-                        <template x-for="(product, index) in filteredProducts" :key="product.id">
+                        <template x-for="(product, index) in paginatedProducts" :key="product.id">
                             <tr class="hover:bg-blue-50 transition">
-                                <td class="px-3 py-2 text-center text-sm text-gray-800" x-text="index + 1"></td>
+                                <td class="px-3 py-2 text-center text-sm text-gray-800" x-text="((currentPage - 1) * perPage) + index + 1"></td>
                                 <td class="px-3 py-2 text-sm text-gray-800" x-text="product.inventory_code"></td>
                                 <td class="px-3 py-2 text-sm text-gray-800" x-text="product.name"></td>
-                                <td class="px-3 py-2 text-sm text-gray-800" x-text="product.category_name"></td>
+                                <td class="px-3 py-2 text-sm text-gray-800" x-text="product.category ? product.category.name : '-'"></td>
                                 <td class="px-3 py-2 text-sm text-gray-800" x-text="product.unit"></td>
                                 <td class="px-3 py-2 text-sm text-gray-800" x-text="formatNumber(product.buy_price)"></td>
                                 <td class="px-3 py-2 text-sm text-gray-800" x-text="formatNumber(product.sale_price)"></td>
@@ -218,6 +238,35 @@ function inventoryForm() {
                         </template>
                     </tbody>
                 </table>
+                <!-- Pagination Controls -->
+                <div class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                    <div class="flex justify-between items-center w-full">
+                        <div class="text-sm text-gray-700">
+                            Showing
+                            <span class="font-medium" x-text="((currentPage - 1) * perPage) + 1"></span>
+                            to
+                            <span class="font-medium" x-text="Math.min(currentPage * perPage, filteredProducts.length)"></span>
+                            of
+                            <span class="font-medium" x-text="filteredProducts.length"></span>
+                            results
+                        </div>
+                        <div class="flex space-x-2">
+                            <button @click="prevPage()" 
+                                    :class="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+                                    :disabled="currentPage === 1"
+                                    class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">
+                                Previous
+                            </button>
+                            <span class="text-gray-600">Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span></span>
+                            <button @click="nextPage()"
+                                    :class="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+                                    :disabled="currentPage === totalPages"
+                                    class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

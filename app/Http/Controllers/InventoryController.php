@@ -70,7 +70,7 @@ class InventoryController extends Controller {
         $categories = InventoryCategory::orderBy('name')->get();
         $units = ['KG', 'Pcs', 'Pack'];
         $accounts = ChartOfAccount::where('type', 'Asset')->orderBy('name')->get();
-        $allProducts = Inventory::orderBy('id', 'desc')->get();
+        $allProducts = Inventory::with('category')->orderBy('id', 'desc')->get();
         return view('inventory.create', compact('nextCode', 'categories', 'units', 'accounts', 'allProducts'));
     }
 
