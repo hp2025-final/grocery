@@ -25,4 +25,13 @@ class Inventory extends Model
         return $this->belongsTo(InventoryCategory::class, 'category_id');
     }
 
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class, 'product_id');
+    }
+
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class, 'product_id');
+    }
 }

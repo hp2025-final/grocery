@@ -123,6 +123,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('reports.inventory.by-category') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('reports.inventory.by-category') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        Inventory by Category
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('stock-adjustments.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('stock-adjustments.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
                         Stock Adjustment
                     </a>

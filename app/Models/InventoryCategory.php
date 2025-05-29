@@ -17,4 +17,9 @@ class InventoryCategory extends Model
             $category->code = 'INC-' . str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
         });
     }
+
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class, 'category_id');
+    }
 }
