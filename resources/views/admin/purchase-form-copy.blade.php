@@ -54,6 +54,8 @@
         gap: 0.25rem;
         align-items: flex-end;
         width: 100%;
+    }    .category-field {
+        width: 25%;
     }
 
     .product-field {
@@ -118,15 +120,24 @@
                 <!-- Products Section --><div class="space-y-2">
                     <template x-for="(item, idx) in items" :key="idx">
                         <div class="product-item">
-                            <!-- Single Row: Product, Unit, Quantity, Unit Price, Total, Remove Button -->
-                            <div class="product-row">
+                            <!-- Single Row: Product, Unit, Quantity, Unit Price, Total, Remove Button -->                            <div class="product-row">
+                                <div class="category-field">
+                                    <label class="block text-xs font-medium mb-0.5">Category</label>
+                                    <select class="block w-full rounded border border-gray-300 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                        x-model="item.category_id">
+                                        <option value="">All Categories</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="product-field">
                                     <label class="block text-xs font-medium mb-0.5">Product</label>
                                     <select :name="`products[${idx}][product_id]`"
                                         class="block w-full rounded border border-gray-300 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
                                         x-model="item.product_id" @change="updateUnit(idx)" required>
                                         <option value="">Select</option>
-                                        <template x-for="product in products" :key="product.id">
+                                        <template x-for="product in filteredProducts(idx)" :key="product.id">
                                             <option :value="product.id" x-text="product.name"></option>
                                         </template>
                                     </select>
@@ -210,13 +221,16 @@
 function purchaseForm() {
     return {
         products: @json($products),
-        items: [{ product_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }],
+        items: [{ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }],
         discount: 0,
         notes: '',
         purchaseDate: '{{ date('Y-m-d') }}',
-        vendorId: '',
-        purchaseId: '',
+        vendorId: '',        purchaseId: '',
         editMode: false,
+        filteredProducts(idx) {
+            const categoryId = parseInt(this.items[idx].category_id);
+            return this.products.filter(p => !categoryId || parseInt(p.category_id) === categoryId);
+        },
         get subtotal() {
             return this.items.reduce((sum, i) => sum + (i.quantity * i.unit_price || 0), 0);
         },
@@ -224,7 +238,7 @@ function purchaseForm() {
             return Math.max(0, this.subtotal - (this.discount || 0));
         },
         addItem() {
-            this.items.push({ product_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 });
+            this.items.push({ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 });
         },
         removeItem(idx) {
             if(this.items.length > 1) this.items.splice(idx, 1);
@@ -247,9 +261,9 @@ function purchaseForm() {
             this.purchaseDate = purchase.purchase_date;
             this.vendorId = purchase.vendor_id;
             this.discount = purchase.discount_amount || 0;
-            this.notes = purchase.notes || '';
-            this.items = purchase.items.map(item => ({
+            this.notes = purchase.notes || '';            this.items = purchase.items.map(item => ({
                 product_id: item.product_id,
+                category_id: this.products.find(p => p.id === item.product_id)?.category_id || '',
                 quantity: item.quantity,
                 unit_price: item.rate,
                 unit_name: item.unit ? item.unit.name : '',
@@ -263,7 +277,7 @@ function purchaseForm() {
             this.vendorId = '';
             this.discount = 0;
             this.notes = '';
-            this.items = [{ product_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }];
+            this.items = [{ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }];
         },
         submitForm(e) {
             // Set form fields before submit

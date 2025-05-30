@@ -41,19 +41,27 @@
 
     .invoice-table .amount {
         font-weight: 600;
-    }    /* Product item layout */
+    }    
+    
+    /* Product item layout */
     .product-item {
         background-color: #f9fafb;
         border: 1px solid #e5e7eb;
         border-radius: 0.5rem;
         padding: 0.5rem;
         margin-bottom: 0.5rem;
-    }    /* Single row layout for products */
+    }    
+
+    /* Single row layout for products */
     .product-row {
         display: flex;
         gap: 0.25rem;
         align-items: flex-end;
         width: 100%;
+    }
+
+    .category-field {
+        width: 25%;
     }
 
     .product-field {
@@ -97,7 +105,8 @@
             </div>
         @endif
         <form method="POST" action="{{ route('sales.store') }}" x-data="salesForm()" @submit.prevent="submitForm">
-            @csrf            <div class="space-y-2">
+            @csrf            
+            <div class="space-y-2">
                 <!-- Date and Customer Selection -->
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -115,23 +124,36 @@
                     </div>
                 </div>
 
-                <!-- Products Section --><div class="space-y-2">
+                <!-- Products Section -->
+                <div class="space-y-2">
                     <template x-for="(item, idx) in items" :key="idx">
                         <div class="product-item">
                             <!-- Single Row: Product, Unit, Quantity, Unit Price, Total, Remove Button -->
                             <div class="product-row">
+                                <div class="category-field">
+                                    <label class="block text-xs font-medium mb-0.5">Category</label>
+                                    <select class="block w-full rounded border border-gray-300 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                        x-model="item.category_id">
+                                        <option value="">All Categories</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 <div class="product-field">
                                     <label class="block text-xs font-medium mb-0.5">Product</label>
                                     <select :name="`products[${idx}][product_id]`"
                                         class="block w-full rounded border border-gray-300 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
                                         x-model="item.product_id" @change="updateUnit(idx)" required>
                                         <option value="">Select</option>
-                                        <template x-for="product in products" :key="product.id">
+                                        <template x-for="product in filteredProducts(idx)" :key="product.id">
                                             <option :value="product.id" x-text="product.name"></option>
                                         </template>
                                     </select>
                                 </div>
-                                  <div class="unit-field" style="display: none;">
+
+                                <div class="unit-field" style="display: none;">
                                     <label class="block text-xs font-medium mb-0.5">Unit</label>
                                     <input type="text"
                                         class="block w-full rounded border border-gray-200 bg-gray-100 px-2 text-xs text-gray-700 focus:outline-none"
@@ -194,13 +216,13 @@
                         <span class="font-bold text-sm text-blue-800" x-text="(subtotal - discount).toFixed(2)"></span>
                     </div>
                 </div>
-
                 <!-- Submit Button -->
                 <div class="flex justify-end pt-2">
                     <button type="submit" 
                         class="bg-gray-900 hover:bg-gray-800 text-white font-medium rounded text-xs px-4 py-1.5 transition">
                         Save Sale
-                    </button>                </div>
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -210,13 +232,16 @@
 function salesForm() {
     return {
         products: @json($products),
-        items: [{ product_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }],
+        items: [{ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }],
         discount: 0,
         notes: '',
         saleDate: '{{ date('Y-m-d') }}',
         customerId: '',
         saleId: '',
-        editMode: false,
+        editMode: false,        filteredProducts(idx) {
+            const categoryId = parseInt(this.items[idx].category_id);
+            return this.products.filter(p => !categoryId || parseInt(p.category_id) === categoryId);
+        },
         get subtotal() {
             return this.items.reduce((sum, i) => sum + (i.quantity * i.unit_price || 0), 0);
         },
@@ -224,7 +249,7 @@ function salesForm() {
             return Math.max(0, this.subtotal - (this.discount || 0));
         },
         addItem() {
-            this.items.push({ product_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 });
+            this.items.push({ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 });
         },
         removeItem(idx) {
             if(this.items.length > 1) this.items.splice(idx, 1);
@@ -250,6 +275,7 @@ function salesForm() {
             this.notes = sale.notes || '';
             this.items = sale.items.map(item => ({
                 product_id: item.product_id,
+                category_id: this.products.find(p => p.id === item.product_id)?.category_id || '',
                 quantity: item.quantity,
                 unit_price: item.rate,
                 unit_name: item.unit ? item.unit.name : '',
@@ -263,7 +289,7 @@ function salesForm() {
             this.customerId = '';
             this.discount = 0;
             this.notes = '';
-            this.items = [{ product_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }];
+            this.items = [{ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }];
         },
         submitForm(e) {
             // Set form fields before submit

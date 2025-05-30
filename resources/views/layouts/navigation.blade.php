@@ -23,7 +23,7 @@
             </button>
             <ul class="space-y-1 mt-1 pl-3 border-l border-gray-100" x-show="activeSection === 'receivables'" x-transition>
                 <li>
-                    <a href="{{ route('sales.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('sales.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                    <a href="{{ route('admin.sales-form-copy') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.sales-form-copy') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
                         Add Sale
                     </a>
                 </li>
@@ -63,7 +63,7 @@
             </button>
             <ul class="space-y-1 mt-1 pl-3 border-l border-gray-100" x-show="activeSection === 'payables'" x-transition>
                 <li>
-                    <a href="{{ route('purchases.create') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('purchases.create') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                    <a href="{{ route('admin.purchase-form-copy') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.purchase-form-copy') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
                         Add Purchase
                     </a>
                 </li>
@@ -253,16 +253,7 @@
                         Admin Dashboard
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('admin.sales-form-copy') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.sales-form-copy') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                        Sales Form Copy
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.purchase-form-copy') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.purchase-form-copy') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
-                        Purchase Form Copy
-                    </a>
-                </li>
+
                 <li>
                     <a href="{{ route('admin.permissions.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('admin.permissions.index') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
                         User Permissions
