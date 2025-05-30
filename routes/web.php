@@ -77,7 +77,7 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::post('/purchases', [App\Http\Controllers\PurchaseController::class, 'store'])->name('purchases.store');
     Route::get('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'show'])->name('purchases.show');
     Route::get('/purchases/{id}/edit', [App\Http\Controllers\PurchaseController::class, 'edit'])->name('purchases.edit');
-    Route::put('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'update'])->name('purchases.update');
+    Route::put('/purchases/{id}', [App\HttpControllers\PurchaseController::class, 'update'])->name('purchases.update');
     Route::delete('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'destroy'])->name('purchases.destroy');
     Route::get('/purchases', [App\Http\Controllers\PurchasesController::class, 'index'])->name('purchases.index');
     Route::get('/purchases/{id}/pdf', [App\Http\Controllers\PurchasesController::class, 'exportPdf'])->name('purchases.pdf');
@@ -125,6 +125,7 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     // Inventory Balances Routes
     Route::get('/inventory-balances', [InventoryBalancesController::class, 'index'])->name('inventory-balances.index');
     Route::get('/inventory-balances/export', [InventoryBalancesController::class, 'exportPdf'])->name('inventory-balances.export');
+    Route::get('/inventory-balances/export-without-prices', [InventoryBalancesController::class, 'exportPdfWithoutPrices'])->name('inventory-balances.export-without-prices');
 
     // Vendor Balances Routes
     Route::get('/vendor-balances', [VendorBalancesController::class, 'index'])->name('vendor-balances.index');
@@ -153,6 +154,7 @@ Route::middleware(['auth', 'verified'])->prefix('reports')->group(function () {
     Route::get('/journal', [App\Http\Controllers\ReportsController::class, 'journal'])->name('reports.journal');
     Route::get('/income-statement', [App\Http\Controllers\ReportsController::class, 'incomeStatement'])->name('reports.income_statement');
     Route::get('/balance-sheet', [App\Http\Controllers\ReportsController::class, 'balanceSheet'])->name('reports.balance_sheet');
+    Route::get('/daily-book', [App\Http\Controllers\DailyBookController::class, 'index'])->name('reports.daily_book');
 });
 
 // Include other route files that should be protected

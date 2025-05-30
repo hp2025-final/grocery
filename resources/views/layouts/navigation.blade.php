@@ -232,6 +232,11 @@
                         Balance Sheet
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('reports.daily_book') }}" class="block px-3 py-2 rounded hover:bg-gray-100 font-medium text-xs {{ request()->routeIs('reports.daily_book') ? 'bg-gray-100 text-gray-900' : 'text-gray-700' }}">
+                        Daily Book
+                    </a>
+                </li>
             </ul>
         </li>
 

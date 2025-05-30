@@ -6,7 +6,7 @@
         <div class="p-4">
             <h2 class="text-lg font-semibold mb-4">Inventory Balances</h2>
 
-            <form action="{{ route('inventory-balances.index') }}" method="GET" class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+            <form action="{{ route('inventory-balances.index') }}" method="GET" class="grid grid-cols-2 sm:grid-cols-6 gap-2 mb-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Search:</label>
                     <input type="text" name="search" value="{{ request('search') }}" 
@@ -32,7 +32,13 @@
                 <div class="flex items-end">
                     <a href="{{ route('inventory-balances.export', ['from' => request('from'), 'to' => request('to'), 'search' => request('search')]) }}" 
                        class="w-full bg-green-500 text-white px-3 py-1.5 rounded text-sm text-center hover:bg-green-600">
-                        Export PDF
+                        Export PDF with Prices
+                    </a>
+                </div>
+                <div class="flex items-end">
+                    <a href="{{ route('inventory-balances.export-without-prices', ['from' => request('from'), 'to' => request('to'), 'search' => request('search')]) }}" 
+                       class="w-full bg-yellow-500 text-white px-3 py-1.5 rounded text-sm text-center hover:bg-yellow-600">
+                        Export PDF without Prices
                     </a>
                 </div>
             </form>
@@ -40,7 +46,8 @@
             <!-- Mobile View (Cards) -->
             <div class="block sm:hidden space-y-2">
                 @foreach($inventory as $item)
-                <div class="bg-white border rounded-lg p-3 shadow-sm">                    <div class="flex justify-between items-start mb-2">
+                <div class="bg-white border rounded-lg p-3 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
                         <div class="font-medium text-gray-900">{{ $item->name }}</div>
                         <div class="flex flex-col gap-1">
                             <a href="{{ url('/inventory/' . $item->id . '/ledger') }}" class="inline-block px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition" title="Ledger">
@@ -65,9 +72,18 @@
                         <div>
                             <div class="text-gray-500">Out</div>
                             <div class="font-medium">{{ number_format($item->period_out, 2) }} {{ $item->unit }}</div>
-                        </div>                        <div>
+                        </div>
+                        <div>
                             <div class="text-gray-500">Closing</div>
                             <div class="font-medium">{{ number_format($item->closing_balance, 2) }} {{ $item->unit }}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Buy Price</div>
+                            <div class="font-medium">{{ number_format($item->buy_price, 2) }}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Sale Price</div>
+                            <div class="font-medium">{{ number_format($item->sale_price, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -87,9 +103,18 @@
                         <div>
                             <div class="text-gray-500">Out</div>
                             <div class="font-medium">{{ number_format($inventory->sum('period_out'), 2) }}</div>
-                        </div>                        <div>
+                        </div>
+                        <div>
                             <div class="text-gray-500">Closing</div>
                             <div class="font-medium">{{ number_format($inventory->sum('closing_balance'), 2) }}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Buy Price</div>
+                            <div class="font-medium">{{ number_format($inventory->sum('buy_price'), 2) }}</div>
+                        </div>
+                        <div>
+                            <div class="text-gray-500">Sale Price</div>
+                            <div class="font-medium">{{ number_format($inventory->sum('sale_price'), 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -104,6 +129,8 @@
                                 <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Opening</th>
                                 <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">In</th>
                                 <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Out</th>                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Closing</th>
+                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Buy Price</th>
+                                <th class="px-3 py-2 text-right text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Sale Price</th>
                                 <th class="px-3 py-2 text-center text-xs sm:text-[12px] font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -114,7 +141,10 @@
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->opening_balance, 2) }} {{ $item->unit }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->period_in, 2) }} {{ $item->unit }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->period_out, 2) }} {{ $item->unit }}</td>
-                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->closing_balance, 2) }} {{ $item->unit }}</td>                                <td class="px-3 py-2 text-center">
+                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->closing_balance, 2) }} {{ $item->unit }}</td>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($item->buy_price, 2) }}</td>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($item->sale_price, 2) }}</td>
+                                <td class="px-3 py-2 text-center">
                                     <div class="flex flex-col space-y-2 justify-center items-center">
                                         <a href="{{ url('/inventory/' . $item->id . '/ledger') }}" class="inline-block px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-semibold transition w-full text-center" title="Ledger">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4h9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
@@ -136,6 +166,8 @@
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($inventory->sum('period_in'), 2) }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($inventory->sum('period_out'), 2) }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($inventory->sum('closing_balance'), 2) }}</td>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">-</td>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">-</td>
                                 <td class="px-3 py-2"></td>
                             </tr>
                         </tfoot>

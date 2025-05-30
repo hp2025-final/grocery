@@ -82,12 +82,13 @@
             font-style: italic;
             display: inline-block;
         }        /* Column widths */
-        .col-name { width: 30%; }
-        .col-opening { width: 17%; }
-        .col-in { width: 17%; }
-        .col-out { width: 17%; }
-        .col-closing { width: 17%; }
-        .col-action { width: 10%; }
+        .col-name { width: 25%; }
+        .col-opening { width: 12%; }
+        .col-in { width: 12%; }
+        .col-out { width: 12%; }
+        .col-closing { width: 12%; }
+        .col-buy { width: 12%; }
+        .col-sale { width: 12%; }
         /* Center align cells */
         .table td { 
             text-align: center;
@@ -136,6 +137,8 @@
                 <th class="col-in text-right">In</th>
                 <th class="col-out text-right">Out</th>
                 <th class="col-closing text-right">Closing</th>
+                <th class="col-buy text-right">Buy Price</th>
+                <th class="col-sale text-right">Sale Price</th>
             </tr>
         </thead>
         <tbody>
@@ -145,6 +148,8 @@
                 <td class="text-right">{{ number_format($item->period_in, 0) }} {{ $item->unit }}</td>
                 <td class="text-right">{{ number_format($item->period_out, 0) }} {{ $item->unit }}</td>
                 <td class="text-right">{{ number_format($item->closing_balance, 0) }} {{ $item->unit }}</td>
+                <td class="text-right">{{ number_format($item->buy_price, 2) }}</td>
+                <td class="text-right">{{ number_format($item->sale_price, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -154,6 +159,8 @@
                 <td class="text-right"><strong>{{ number_format($inventory->sum('period_in'), 0) }}</strong></td>
                 <td class="text-right"><strong>{{ number_format($inventory->sum('period_out'), 0) }}</strong></td>
                 <td class="text-right"><strong>{{ number_format($inventory->sum('closing_balance'), 0) }}</strong></td>
+                <td class="text-right">-</td>
+                <td class="text-right">-</td>
             </tr>
         </tfoot>
     </table>    <div class="footer">
