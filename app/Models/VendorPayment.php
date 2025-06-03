@@ -10,7 +10,7 @@ class VendorPayment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'payment_number', 'vendor_id', 'payment_date', 'amount_paid', 'payment_method', 'payment_account_id', 'reference', 'notes'
+        'payment_number', 'vendor_id', 'payment_date', 'amount_paid', 'payment_method', 'payment_account_id', 'reference', 'notes', 'user_id'
     ];
 
     public function vendor()
@@ -21,5 +21,10 @@ class VendorPayment extends Model
     public function paymentAccount()
     {
         return $this->belongsTo(\App\Models\ChartOfAccount::class, 'payment_account_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
     }
 }

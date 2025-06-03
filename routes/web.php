@@ -93,11 +93,13 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::put('/customer-receipts/{id}', [App\Http\Controllers\CustomerReceiptController::class, 'update'])->name('customer-receipts.update');
     Route::delete('/customer-receipts/{id}', [App\Http\Controllers\CustomerReceiptController::class, 'destroy'])->name('customer-receipts.destroy');
     Route::get('/receipts', [App\Http\Controllers\ReceiptsController::class, 'index'])->name('receipts.index');
+    // Vendor Payment routes
     Route::get('/vendor-payments/live-search', [App\Http\Controllers\VendorPaymentController::class, 'liveSearch'])->name('vendor-payments.live-search');
     Route::get('/vendor-payments/create', [App\Http\Controllers\VendorPaymentController::class, 'create'])->name('vendor-payments.create');
     Route::post('/vendor-payments', [App\Http\Controllers\VendorPaymentController::class, 'store'])->name('vendor-payments.store');
-    Route::get('/vendor-payments/{id}', [App\Http\Controllers\VendorPaymentController::class, 'show'])->name('vendor-payments.show');
     Route::delete('/vendor-payments/{id}', [App\Http\Controllers\VendorPaymentController::class, 'destroy'])->name('vendor-payments.destroy');
+    Route::get('/vendor-payments/export-pdf/{id}', [App\Http\Controllers\VendorPaymentController::class, 'exportPdf'])->name('vendor-payments.export-pdf');
+    Route::get('/vendor-payments/export-table', [App\Http\Controllers\VendorPaymentController::class, 'exportTable'])->name('vendor-payments.export-table');
     Route::get('/stock-adjustments/create', [App\Http\Controllers\StockAdjustmentController::class, 'create'])->name('stock-adjustments.create');
     Route::post('/stock-adjustments', [App\Http\Controllers\StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
     Route::get('/stock-adjustments', [App\Http\Controllers\StockAdjustmentsController::class, 'index'])->name('stock-adjustments.index');
@@ -167,3 +169,7 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
 
 // Include auth routes
 require __DIR__.'/auth.php';
+
+// Customer Receipt routes
+Route::get('/customer-receipts/export-pdf/{id}', [App\Http\Controllers\CustomerReceiptController::class, 'exportPdf'])->name('customer-receipts.export-pdf');
+Route::get('/customer-receipts/export-table', [App\Http\Controllers\CustomerReceiptController::class, 'exportTable'])->name('customer-receipts.export-table');
