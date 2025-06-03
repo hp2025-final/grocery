@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'providers' => [
         /*
          * Laravel Framework Service Providers...
@@ -32,6 +31,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Barryvdh\DomPDF\ServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -168,5 +168,4 @@ return [
     ],
 
     // Company configuration has been moved to config/company.php
-
 ];

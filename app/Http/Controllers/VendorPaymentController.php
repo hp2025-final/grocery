@@ -69,7 +69,6 @@ class VendorPaymentController extends Controller {
                 $payment->amount_paid = $entry['amount_paid'];
                 $payment->notes = $entry['notes'] ?? null;
                 $payment->payment_method = 'bank';
-                $payment->user_id = auth()->id();
 
                 // Generate payment number (PV-00001 format)
                 $lastPayment = VendorPayment::orderByDesc('id')->first();

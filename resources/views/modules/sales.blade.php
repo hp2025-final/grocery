@@ -30,14 +30,18 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="lg:col-span-1 flex items-end">
-                            <button type="submit" 
-                                class="w-full h-9 flex items-center justify-center px-4 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                            </svg>
-                            Filter
-                        </button>
+                        <div class="lg:col-span-1 flex items-end gap-2">
+                            <button type="submit" class="flex-1 h-9 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">
+                                Filter
+                            </button>
+                            <a href="{{ route('sales.export_pdf', request()->all()) }}"
+                               class="flex items-center justify-center h-9 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export PDF
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

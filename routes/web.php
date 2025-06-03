@@ -42,9 +42,7 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::get('/expense-accounts/{id}/ledger/filter', [App\Http\Controllers\ExpenseAccountController::class, 'ledgerFilter'])->name('expense-accounts.ledger.filter');
     Route::get('/sales/{id}/edit', [App\Http\Controllers\SaleController::class, 'edit'])->name('sales.edit');
     Route::put('/sales/{id}', [App\Http\Controllers\SaleController::class, 'update'])->name('sales.update');
-    Route::delete('/sales/{id}', [App\Http\Controllers\SaleController::class, 'destroy'])->name('sales.destroy');
-    Route::get('/sales', [App\Http\Controllers\SalesController::class, 'index'])->name('sales.index');
-    Route::get('/sales/{id}/pdf', [App\Http\Controllers\SalesController::class, 'exportPdf'])->name('sales.pdf');
+    // Sales routes are now in routes/sales.php
 
     // Customers
     Route::get('/customers/create', [App\Http\Controllers\CustomerController::class, 'create'])->name('customers.create');
@@ -112,10 +110,6 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::delete('/expenses/{expense}', [App\Http\Controllers\ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('/expenses', [App\Http\Controllers\ExpensesController::class, 'index'])->name('expenses.index');
     Route::get('/reports/trial-balance', [App\Http\Controllers\ReportsController::class, 'trialBalance'])->name('reports.trial_balance');
-    Route::get('/reports/general-ledger', [App\Http\Controllers\ReportsController::class, 'generalLedger'])->name('reports.general_ledger');
-    Route::get('/reports/journal', [App\Http\Controllers\ReportsController::class, 'journal'])->name('reports.journal');
-    Route::get('/reports/income-statement', [App\Http\Controllers\ReportsController::class, 'incomeStatement'])->name('reports.income_statement');
-    Route::get('/reports/balance-sheet', [App\Http\Controllers\ReportsController::class, 'balanceSheet'])->name('reports.balance_sheet');
     Route::get('/reports/customer-list', [App\Http\Controllers\CustomerListController::class, 'index'])->name('reports.customer_list');
     Route::get('/customer-balances', [CustomerBalancesController::class, 'index'])->name('customer-balances.index');
     Route::get('/customer-balances/export', [CustomerBalancesController::class, 'exportPdf'])->name('customer-balances.export');
