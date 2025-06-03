@@ -12,6 +12,10 @@
     <div class="flex justify-between items-end mb-4 w-full gap-2">
         <form method="get" class="flex flex-1 gap-2 items-end w-full">
             <div class="flex-1 min-w-0">
+                <label for="party_search" class="block text-xs font-semibold mb-1">Party Name</label>
+                <input type="text" name="party_search" id="party_search" class="form-input form-input-sm rounded border-gray-300 w-full text-xs py-1.5 px-2 h-8" value="{{ request('party_search') }}" placeholder="Search party name...">
+            </div>
+            <div class="flex-1 min-w-0">
                 <label for="from" class="block text-xs font-semibold mb-1">From</label>
                 <input type="date" name="from" id="from" class="form-input form-input-sm rounded border-gray-300 w-full text-xs py-1.5 px-2 h-8" value="{{ $from }}">
             </div>

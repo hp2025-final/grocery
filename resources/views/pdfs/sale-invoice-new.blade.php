@@ -69,8 +69,8 @@
         .items td:nth-child(5) {
             width: 15%;
         }.items th {
-            background: #000000;
-            color: #ffffff;
+            background: #ffffff;
+            color: #000000;
             padding: 8px;
             border: 1px solid #ddd;
             text-align: left;
@@ -124,13 +124,12 @@
         .totals strong {
             font-size: 12px;
             font-weight: bold;
-        }
-        .amount-cell {
+        }        .amount-cell {
             text-align: right;
         }
         .totals tr:last-child td {
-            background: #000000;
-            color: #ffffff;
+            background: #ffffff;
+            color: #000000;
         }        .footer {
             position: fixed;
             bottom: 20px;

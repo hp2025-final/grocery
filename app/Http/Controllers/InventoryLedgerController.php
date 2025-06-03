@@ -13,6 +13,11 @@ class InventoryLedgerController extends Controller
     {
         $inventory = Inventory::findOrFail($id);
 
+        // Get filters from request
+        $from = request('from');
+        $to = request('to');
+        $partySearch = request('party_search');
+
         // Use a single raw SQL to merge opening, purchases, and sales, ordered by date
         $sql = "
             SELECT
@@ -36,6 +41,7 @@ class InventoryLedgerController extends Controller
             INNER JOIN purchases ON purchase_items.purchase_id = purchases.id
             INNER JOIN vendors ON purchases.vendor_id = vendors.id
             WHERE purchase_items.product_id = ?
+            " . ($partySearch ? "AND vendors.name LIKE ?" : "") . "
 
             UNION ALL
 
@@ -49,27 +55,35 @@ class InventoryLedgerController extends Controller
             INNER JOIN sales ON sale_items.sale_id = sales.id
             INNER JOIN customers ON sales.customer_id = customers.id
             WHERE sale_items.product_id = ?
+            " . ($partySearch ? "AND customers.name LIKE ?" : "") . "
 
             ORDER BY date IS NULL, date ASC
         ";
 
-        // Date filter
-        $from = request('from');
-        $to = request('to');
+        // Build parameters array
+        $params = [$inventory->id, $inventory->id];
+        if ($partySearch) {
+            $params[] = '%' . $partySearch . '%';
+            $params[] = $inventory->id;
+            $params[] = '%' . $partySearch . '%';
+        } else {
+            $params[] = $inventory->id;
+        }
 
-        $results = \DB::select($sql, [$inventory->id, $inventory->id, $inventory->id]);
+        $results = DB::select($sql, $params);
 
         // Calculate running balance and filter by date
         $balance = 0;
         $rows = [];
         $opening_balance = 0;
-        $rows = [];
         $pre_filter_balance = 0;
+        
         foreach ($results as $row) {
             $in = isset($row->in) ? ($row->in ?: 0) : 0;
             $out = isset($row->out) ? ($row->out ?: 0) : 0;
             $row = (array) $row;
             $row_date = $row['date'] ?? null;
+            
             // Calculate pre-filter opening balance
             if ($from && $row_date && $row_date < $from) {
                 $pre_filter_balance += $in - $out;
@@ -84,16 +98,18 @@ class InventoryLedgerController extends Controller
             $row['balance'] = $opening_balance;
             $rows[] = $row;
         }
+        
         // Insert running opening balance row if filter is applied
-        if ($from) {
+        if ($from || $partySearch) {
             array_unshift($rows, [
-                'date' => $from,
-                'party' => 'Opening (as of ' . $from . ')',
+                'date' => $from ?: date('Y-m-d'),
+                'party' => 'Opening' . ($partySearch ? ' (Filtered)' : ' (as of ' . ($from ?: 'today') . ')'),
                 'in' => null,
                 'out' => null,
                 'rate' => null,
                 'balance' => $pre_filter_balance,
             ]);
+            
             // Recalculate balances for filtered rows
             $running = $pre_filter_balance;
             foreach ($rows as $i => $row) {
@@ -240,6 +256,11 @@ class InventoryLedgerController extends Controller
     {
         $inventory = Inventory::findOrFail($id);
 
+        // Get filters
+        $from = request('from');
+        $to = request('to');
+        $partySearch = request('party_search');
+
         // Use a single raw SQL to merge opening, purchases, and sales, ordered by date
         $sql = "
             SELECT
@@ -261,6 +282,7 @@ class InventoryLedgerController extends Controller
             INNER JOIN purchases ON purchase_items.purchase_id = purchases.id
             INNER JOIN vendors ON purchases.vendor_id = vendors.id
             WHERE purchase_items.product_id = ?
+            " . ($partySearch ? "AND vendors.name LIKE ?" : "") . "
 
             UNION ALL
 
@@ -273,15 +295,22 @@ class InventoryLedgerController extends Controller
             INNER JOIN sales ON sale_items.sale_id = sales.id
             INNER JOIN customers ON sales.customer_id = customers.id
             WHERE sale_items.product_id = ?
+            " . ($partySearch ? "AND customers.name LIKE ?" : "") . "
 
             ORDER BY date IS NULL, date ASC
         ";
 
-        // Date filter
-        $from = request('from');
-        $to = request('to');
+        // Build parameters array
+        $params = [$inventory->id, $inventory->id];
+        if ($partySearch) {
+            $params[] = '%' . $partySearch . '%';
+            $params[] = $inventory->id;
+            $params[] = '%' . $partySearch . '%';
+        } else {
+            $params[] = $inventory->id;
+        }
 
-        $results = \DB::select($sql, [$inventory->id, $inventory->id, $inventory->id]);
+        $results = DB::select($sql, $params);
 
         // Calculate running balance and filter by date
         $balance = 0;
@@ -300,24 +329,21 @@ class InventoryLedgerController extends Controller
                 $pre_filter_balance += $in - $out;
                 continue;
             }
-            
             $opening_balance += $in - $out;
-            
             // Date filtering (skip if not in range)
             if ($row_date) {
                 if ($from && $row_date < $from) continue;
                 if ($to && $row_date > $to) continue;
             }
-            
             $row['balance'] = $opening_balance;
             $rows[] = $row;
         }
         
         // Insert running opening balance row if filter is applied
-        if ($from) {
+        if ($from || $partySearch) {
             array_unshift($rows, [
-                'date' => $from,
-                'party' => 'Opening (as of ' . $from . ')',
+                'date' => $from ?: date('Y-m-d'),
+                'party' => 'Opening' . ($partySearch ? ' (Filtered)' : ' (as of ' . ($from ?: 'today') . ')'),
                 'in' => null,
                 'out' => null,
                 'balance' => $pre_filter_balance,

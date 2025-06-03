@@ -53,10 +53,9 @@
             margin: 20px 0;
             font-size: 12px;
             border: 1px solid #ddd;
-        }
-        .items th {
-            background: #000000;
-            color: #ffffff;
+        }        .items th {
+            background: #ffffff;
+            color: #000000;
             padding: 8px;
             border: 1px solid #ddd;
             text-align: left;
@@ -112,10 +111,9 @@
         }
         .amount-cell {
             text-align: right;
-        }
-        .totals tr:last-child td {
-            background: #000000;
-            color: #ffffff;
+        }        .totals tr:last-child td {
+            background: #ffffff;
+            color: #000000;
         }
         .footer {
             position: fixed;
