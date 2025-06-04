@@ -7,14 +7,13 @@
             <h2 class="text-lg font-semibold mb-4">Vendor Balances</h2>
 
             <form action="{{ route('vendor-balances.index') }}" method="GET" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">From:</label>
-                    <input type="date" name="from" value="{{ request('from') }}" 
+                <div>                    <label class="block text-xs font-medium text-gray-700 mb-1">From:</label>
+                    <input type="date" name="from" value="{{ $from }}" 
                            class="w-full border-gray-300 rounded text-sm px-2 py-1">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">To:</label>
-                    <input type="date" name="to" value="{{ request('to') }}" 
+                    <input type="date" name="to" value="{{ $to }}" 
                            class="w-full border-gray-300 rounded text-sm px-2 py-1">
                 </div>
                 <div class="flex items-end">

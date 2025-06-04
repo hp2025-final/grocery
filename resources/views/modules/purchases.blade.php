@@ -12,12 +12,12 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">From Date</label>
-                            <input type="date" name="from_date" value="{{ request('from_date') }}" 
+                            <input type="date" name="from_date" value="{{ $from_date }}" 
                                 class="block w-full h-9 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500" />
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">To Date</label>
-                            <input type="date" name="to_date" value="{{ request('to_date') }}" 
+                            <input type="date" name="to_date" value="{{ $to_date }}" 
                                 class="block w-full h-9 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500" />
                         </div>
                         <div>

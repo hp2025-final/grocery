@@ -25,11 +25,34 @@ class BankLedgerController extends Controller
         $to = $request->input('to', date('Y-m-d'));
 
         $accountId = $bank->account_id;
+
+        // Get opening balance if date filter is applied
+        $openingBalance = null;
+        $balance = 0;
+        if ($from) {
+            $openingBalance = $this->calculateOpeningBalance($accountId, $from);
+            $balance = $openingBalance;
+        }
+
+        // First get all entries up to the current page to calculate correct running balance
+        $currentPage = $request->input('page', 1);
+        $perPage = 20;
+        
         $query = DB::table('journal_entry_lines')
             ->join('journal_entries', 'journal_entry_lines.journal_entry_id', '=', 'journal_entries.id')
             ->where('journal_entry_lines.account_id', $accountId);
-        if ($from) $query->where('journal_entries.date', '>=', $from);
+
+        if ($from) {
+            $query->where(function($q) use ($from) {
+                $q->where('journal_entries.date', '>=', $from)
+                  ->orWhere(function($q2) {
+                      $q2->where('journal_entries.reference_type', 'bank')
+                         ->where('journal_entries.description', 'Bank opening balance');
+                  });
+            });
+        }
         if ($to) $query->where('journal_entries.date', '<=', $to);
+
         // Apply search filter if present
         $search = $request->input('search');
         if ($search) {
@@ -38,11 +61,26 @@ class BankLedgerController extends Controller
                   ->orWhere('journal_entries.entry_number', 'like', "%$search%")
                   ->orWhere('journal_entries.reference_type', 'like', "%$search%")
                   ->orWhere('journal_entry_lines.debit', 'like', "%$search%")
-                  ->orWhere('journal_entry_lines.credit', 'like', "%$search%")
-                  ;
+                  ->orWhere('journal_entry_lines.credit', 'like', "%$search%");
             });
         }
+
+        // Clone query for all previous entries
+        $previousEntriesQuery = clone $query;
+        $allPreviousEntries = $previousEntriesQuery
+            ->orderBy('journal_entries.date')
+            ->orderBy('journal_entries.id')
+            ->limit(($currentPage - 1) * $perPage)
+            ->get();
+
+        // Calculate balance including all previous entries
+        foreach ($allPreviousEntries as $entry) {
+            $balance += ($entry->debit ?? 0) - ($entry->credit ?? 0);
+        }
+
+        // Get paginated entries
         $entries = $query->orderBy('journal_entries.date')
+            ->orderBy('journal_entries.id')
             ->select(
                 'journal_entries.date',
                 'journal_entries.description',
@@ -53,160 +91,84 @@ class BankLedgerController extends Controller
                 'journal_entry_lines.credit',
                 'journal_entries.created_at'
             )
-            ->paginate(20)
+            ->paginate($perPage)
             ->withQueryString();
 
-        $openingBalance = null;
-        $balance = 0;
-        $description = '';
-        // Opening balance logic
-        if ($from) {
-            $openingQuery = DB::table('journal_entry_lines')
-                ->join('journal_entries', 'journal_entry_lines.journal_entry_id', '=', 'journal_entries.id')
-                ->where('journal_entry_lines.account_id', $accountId)
-                ->where('journal_entries.date', '<', $from)
-                ->select('journal_entry_lines.debit', 'journal_entry_lines.credit')
-                ->get();
-            $openingBalance = 0;
-            foreach ($openingQuery as $entry) {
-                $openingBalance += ($entry->debit ?? 0) - ($entry->credit ?? 0);
-            }
-            $rows[] = [
-                'date' => $from,
-                'type' => 'Opening balance',
-                'reference' => '',
-                'description' => $description,
-                'debit' => '0.00',
-                'credit' => '0.00',
-                'balance' => number_format($openingBalance, 2),
-            ];
-            $balance = $openingBalance;
-        }
-        $processedRows = [];
+        $rows = [];
+        
+        // Process entries
         foreach ($entries as $row) {
             $debit = $row->debit ?? 0;
             $credit = $row->credit ?? 0;
             $balance += ($debit - $credit);
+            
             // Show related customer/vendor account name in description
             $description = '';
-            if ($row->reference_type === 'customer_receipt') {
-                $receipt = \App\Models\CustomerReceipt::find($row->reference_id);
-                if ($receipt && $receipt->customer_id) {
-                    $customer = Customer::find($receipt->customer_id);
-                    if ($customer) {
-                        $description = $customer->name;
+            $notes = '';
+            $reference = '';
+            $customer_id = null;
+            $vendor_id = null;
+            $type = $row->reference_type;
+
+            // For bank opening balance entries
+            if ($type === 'bank' && $row->description === 'Bank opening balance') {
+                $type = 'Opening balance for bank: ' . $bank->name;
+                $description = '';
+            }
+            // Process different transaction types
+            elseif ($row->reference_type === 'customer_receipt') {
+                $receipt = CustomerReceipt::find($row->reference_id);
+                if ($receipt) {
+                    if ($receipt->customer_id) {
+                        $customer = Customer::find($receipt->customer_id);
+                        if ($customer) {
+                            $description = $customer->name;
+                        }
                     }
+                    $notes = $receipt->notes ?? '';
+                    $reference = $receipt->reference ?? '';
+                    $customer_id = $receipt->customer_id;
                 }
             } elseif ($row->reference_type === 'vendor_payment') {
-                $payment = \App\Models\VendorPayment::find($row->reference_id);
-                if ($payment && $payment->vendor_id) {
-                    $vendor = Vendor::find($payment->vendor_id);
-                    if ($vendor) {
-                        $description = $vendor->name;
+                $payment = VendorPayment::find($row->reference_id);
+                if ($payment) {
+                    if ($payment->vendor_id) {
+                        $vendor = Vendor::find($payment->vendor_id);
+                        if ($vendor) {
+                            $description = $vendor->name;
+                        }
                     }
+                    $notes = $payment->notes ?? '';
+                    $reference = $payment->reference ?? '';
+                    $vendor_id = $payment->vendor_id;
                 }
-            } elseif ($row->reference_type === 'customer_receipt') {
-                $receipt = \App\Models\CustomerReceipt::find($row->reference_id);
-                if ($receipt && $receipt->customer_id) {
-                    $customer = Customer::find($receipt->customer_id);
-                    if ($customer) {
-                        $description = $customer->name;
-                    }
-                }
-            } elseif (in_array($row->reference_type, ['customer', 'sale'])) {
-                $customer = Customer::find($row->reference_id);
-                if ($customer) {
-                    $description = 'Customer: '.$customer->name;
-                    if ($customer->phone) {
-                        $description .= ' | Phone: '.$customer->phone;
-                    }
+            } elseif ($row->reference_type === 'bank_transfer') {
+                $transfer = BankTransfer::with(['fromBank', 'toBank'])->find($row->reference_id);
+                if ($transfer) {
+                    $description = 'Transfer: ' . $transfer->fromBank->name . ' → ' . $transfer->toBank->name;
+                    $notes = $transfer->description ?? '';
                 }
             } elseif ($row->reference_type === 'expense') {
                 $expense = \App\Models\Expense::find($row->reference_id);
                 if ($expense) {
-                    $descParts = [];
-                    // Add expense account name if available
                     if ($expense->expense_account_id) {
-                        $expenseAccount = \App\Models\ChartOfAccount::find($expense->expense_account_id);
+                        $expenseAccount = ChartOfAccount::find($expense->expense_account_id);
                         if ($expenseAccount) {
-                            $descParts[] = $expenseAccount->name;
+                            $description = $expenseAccount->name;
                         }
                     }
+                    $notes = $expense->notes ?? '';
+                    $reference = $expense->reference ?? '';
+                }
+            }
 
-                    $description = implode(' | ', $descParts);
-                }
-            } elseif ($row->reference_type === 'bank_transfer') {
-                $transfer = \App\Models\BankTransfer::with(['fromBank', 'toBank'])->find($row->reference_id);
-                if ($transfer) {
-                    $description = 'Transfer: ' . $transfer->fromBank->name . ' → ' . $transfer->toBank->name;
-                    $notes = $transfer->description ?? '';
-                }
-            } elseif (in_array($row->reference_type, ['vendor', 'purchase'])) {
-                $vendor = Vendor::find($row->reference_id);
-                if ($vendor) {
-                    $description = 'Vendor: '.$vendor->name;
-                    if ($vendor->phone) {
-                        $description .= ' | Phone: '.$vendor->phone;
-                    }
-                }
-            }
-            $notes = '';
-            if ($row->reference_type === 'bank_transfer') {
-                $transfer = \App\Models\BankTransfer::with(['fromBank', 'toBank'])->find($row->reference_id);
-                if ($transfer) {
-                    $description = 'Transfer: ' . $transfer->fromBank->name . ' → ' . $transfer->toBank->name;
-                    $notes = $transfer->description ?? '';
-                }
-            } elseif ($row->reference_type === 'customer_receipt') {
-                $receipt = \App\Models\CustomerReceipt::find($row->reference_id);
-                if ($receipt && !empty($receipt->notes)) {
-                    $notes = $receipt->notes;
-                }
-            } elseif ($row->reference_type === 'vendor_payment') {
-                $payment = \App\Models\VendorPayment::find($row->reference_id);
-                if ($payment && !empty($payment->notes)) {
-                    $notes = $payment->notes;
-                }
-            }
-            $reference = '';
-            if ($row->reference_type === 'customer_receipt') {
-                $receipt = \App\Models\CustomerReceipt::find($row->reference_id);
-                if ($receipt && !empty($receipt->reference)) {
-                    $reference = $receipt->reference;
-                }
-            } elseif ($row->reference_type === 'vendor_payment') {
-                $payment = \App\Models\VendorPayment::find($row->reference_id);
-                if ($payment && !empty($payment->reference)) {
-                    $reference = $payment->reference;
-                }
-            } elseif ($row->reference_type === 'expense') {
-                $expense = \App\Models\Expense::find($row->reference_id);
-                if ($expense && !empty($expense->description)) {
-                    $reference = $expense->description;
-                }
-            }
-            $customer_id = null;
-            $vendor_id = null;
-            if ($row->reference_type === 'customer_receipt') {
-                $receipt = \App\Models\CustomerReceipt::find($row->reference_id);
-                if ($receipt) {
-                    $customer_id = $receipt->customer_id;
-                }
-            } elseif (in_array($row->reference_type, ['customer', 'sale'])) {
-                $customer_id = $row->reference_id;
-            } elseif ($row->reference_type === 'vendor_payment') {
-                $payment = \App\Models\VendorPayment::find($row->reference_id);
-                if ($payment) {
-                    $vendor_id = $payment->vendor_id;
-                }
-            }
-            $processedRows[] = [
+            $rows[] = [
                 'date' => $row->date,
-                'type' => $row->reference_type === 'customer_receipt' ? 'Receipt' : ($row->reference_type === 'vendor_payment' ? 'Payment' : ucfirst($row->reference_type ?? '')),
+                'type' => ucfirst(str_replace('_', ' ', $type ?? '')),
                 'reference' => $reference,
-                'description' => $description,
-                'debit' => is_numeric($debit) ? number_format($debit, 2) : '0.00',
-                'credit' => is_numeric($credit) ? number_format($credit, 2) : '0.00',
+                'description' => $description ?: $row->description,
+                'debit' => number_format($debit, 2),
+                'credit' => number_format($credit, 2),
                 'balance' => number_format($balance, 2),
                 'created_at' => isset($row->created_at) ? (new \Carbon\Carbon($row->created_at))->format('ymdHi') : '',
                 'notes' => $notes,
@@ -214,15 +176,19 @@ class BankLedgerController extends Controller
                 'vendor_id' => $vendor_id,
             ];
         }
-        $entries->setCollection(collect($processedRows));
+
+        $entries->setCollection(collect($rows));
+        
         $viewData = compact('bank', 'from', 'to', 'entries');
         if (!is_null($openingBalance)) {
             $viewData['openingBalance'] = $openingBalance;
         }
+
         if ($request->ajax()) {
             $html = view('banks._ledger_table', $viewData)->render();
             return response()->json(['html' => $html]);
         }
+        
         return view('banks.ledger', $viewData);
     }
 

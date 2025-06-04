@@ -7,13 +7,14 @@ class PurchasesController extends Controller {
     public function index(Request $request) {
         $query = \App\Models\Purchase::with('vendor');
 
-        // Date range filter
-        if ($request->filled('from_date')) {
-            $query->whereDate('purchase_date', '>=', $request->from_date);
-        }
-        if ($request->filled('to_date')) {
-            $query->whereDate('purchase_date', '<=', $request->to_date);
-        }
+        // Get date filters with defaults
+        $from_date = $request->input('from_date', '2025-01-01');
+        $to_date = $request->input('to_date', '2025-06-04');
+
+        // Apply date filters
+        $query->whereDate('purchase_date', '>=', $from_date);
+        $query->whereDate('purchase_date', '<=', $to_date);
+
         // Vendor filter
         if ($request->filled('vendor_id')) {
             $query->where('vendor_id', $request->vendor_id);
@@ -34,7 +35,9 @@ class PurchasesController extends Controller {
         }
         $purchases = $query->orderByDesc('purchase_date')->paginate(15)->withQueryString();
         $vendors = \App\Models\Vendor::orderBy('name')->get();
-        return view('modules.purchases', compact('purchases', 'vendors'));
+
+        // Pass default dates to view
+        return view('modules.purchases', compact('purchases', 'vendors', 'from_date', 'to_date'));
     }
 
     public function exportPdf($id)

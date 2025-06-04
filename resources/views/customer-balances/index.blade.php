@@ -7,14 +7,13 @@
             <h2 class="text-lg font-semibold mb-4">Customer Balances</h2>
 
             <form action="{{ route('customer-balances.index') }}" method="GET" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">From:</label>
-                    <input type="date" name="from" value="{{ request('from') }}" 
+                <div>                    <label class="block text-xs font-medium text-gray-700 mb-1">From:</label>
+                    <input type="date" name="from" value="{{ $from }}" 
                            class="w-full border-gray-300 rounded text-sm px-2 py-1">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">To:</label>
-                    <input type="date" name="to" value="{{ request('to') }}" 
+                    <input type="date" name="to" value="{{ $to }}" 
                            class="w-full border-gray-300 rounded text-sm px-2 py-1">
                 </div>
                 <div class="flex items-end">
@@ -23,8 +22,7 @@
                         Filter
                     </button>
                 </div>
-                <div class="flex items-end">
-                    <a href="{{ route('customer-balances.export', ['from' => request('from'), 'to' => request('to')]) }}" 
+                <div class="flex items-end">                    <a href="{{ route('customer-balances.export', ['from' => $from, 'to' => $to]) }}" 
                        class="w-full bg-green-500 text-white px-3 py-1.5 rounded text-sm text-center hover:bg-green-600">
                         Export
                     </a>
@@ -54,9 +52,8 @@
                             <div class="text-gray-500">Pr.Dr</div>
                             <div class="font-medium">{{ number_format($customer->current_month_sales, 2) }}</div>
                         </div>
-                        <div>
-                            <div class="text-gray-500">Pr.Cr</div>
-                            <div class="font-medium">{{ number_format($customer->current_month_payments, 2) }}</div>
+                        <div>                            <div class="text-gray-500">Pr.Cr</div>
+                            <div class="font-medium">{{ number_format($customer->current_month_receipts, 2) }}</div>
                         </div>
                         <div>
                             <div class="text-gray-500">Balance</div>
@@ -79,7 +76,7 @@
                         </div>
                         <div>
                             <div class="text-gray-500">Pr.Cr</div>
-                            <div class="font-medium">{{ number_format($customers->sum('current_month_payments'), 2) }}</div>
+                            <div class="font-medium">{{ number_format($customers->sum('current_month_receipts'), 2) }}</div>
                         </div>
                         <div>
                             <div class="text-gray-500">Balance</div>
@@ -109,7 +106,7 @@
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900">{{ $customer->name }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($customer->opening_balance, 2) }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($customer->current_month_sales, 2) }}</td>
-                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($customer->current_month_payments, 2) }}</td>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($customer->current_month_receipts, 2) }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] text-gray-900 text-right">{{ number_format($customer->closing_balance, 2) }}</td>
                                 <td class="px-3 py-2 text-center">
                                     <a href="{{ url('/customers/' . $customer->id . '/ledger') }}" 
@@ -128,7 +125,7 @@
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900">Total</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($customers->sum('opening_balance'), 2) }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($customers->sum('current_month_sales'), 2) }}</td>
-                                <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($customers->sum('current_month_payments'), 2) }}</td>
+                                <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($customers->sum('current_month_receipts'), 2) }}</td>
                                 <td class="px-3 py-2 text-sm sm:text-[12px] font-medium text-gray-900 text-right">{{ number_format($customers->sum('closing_balance'), 2) }}</td>
                                 <td class="px-3 py-2"></td>
                             </tr>

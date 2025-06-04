@@ -62,18 +62,14 @@ class CustomerBalancesController extends Controller
                 ];
             });
 
-        if ($request->has('export') && $request->get('export') === 'pdf') {
-            $pdf = PDF::loadView('reports.customer_balances_pdf', compact('customers', 'from', 'to'));
-            return $pdf->download('customer_balances.pdf');
-        }
-
-        return view('reports.customer_balances', compact('customers', 'from', 'to'));
+        // Return view with data
+        return view('customer-balances.index', compact('customers', 'from', 'to'));
     }
 
     public function exportPdf(Request $request)
     {
         $customers = $this->index($request)->getData()['customers'];
-        $from = $request->input('from', date('Y-m-d'));
+        $from = $request->input('from', '2025-01-01');
         $to = $request->input('to', date('Y-m-d'));
 
         $pdf = PDF::loadView('reports.customer_balances_pdf', compact('customers', 'from', 'to'));
