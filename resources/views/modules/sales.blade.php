@@ -12,12 +12,12 @@
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                         <div class="lg:col-span-1">
                             <label class="block text-xs font-medium text-gray-700 mb-1">From Date</label>
-                            <input type="date" name="from_date" value="{{ request('from_date') }}" 
+                            <input type="date" name="from_date" value="{{ $from_date }}" 
                                 class="w-full h-9 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500" />
                         </div>
                         <div class="lg:col-span-1">
                             <label class="block text-xs font-medium text-gray-700 mb-1">To Date</label>
-                            <input type="date" name="to_date" value="{{ request('to_date') }}" 
+                            <input type="date" name="to_date" value="{{ $to_date }}" 
                                 class="w-full h-9 rounded-md border-gray-300 shadow-sm text-sm focus:border-blue-500 focus:ring-blue-500" />
                         </div>
                         <div class="lg:col-span-1">
@@ -34,7 +34,12 @@
                             <button type="submit" class="flex-1 h-9 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">
                                 Filter
                             </button>
-                            <a href="{{ route('sales.export_pdf', request()->all()) }}"
+                            {{-- Add debug output to see the URL --}}
+                            @php
+                                $exportUrl = route('sales.export_pdf', array_merge(request()->all(), ['debug' => true]));
+                            @endphp
+                            <a href="{{ $exportUrl }}"
+                               onclick="console.log('Export URL:', '{{ $exportUrl }}')"
                                class="flex items-center justify-center h-9 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

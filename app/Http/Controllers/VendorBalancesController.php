@@ -14,10 +14,9 @@ class VendorBalancesController extends Controller
 {
     public function index(Request $request)
     {
-        // Get date filters, default to current date
-        $today = date('Y-m-d');
-        $from = $request->input('from', $today);
-        $to = $request->input('to', $today);
+        // Get date filters, default to 2025-01-01 and current date
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
 
         $vendors = DB::table('vendors')
             ->select([
@@ -133,4 +132,4 @@ class VendorBalancesController extends Controller
 
         return $pdf->download('vendor-balances-' . $from . '-to-' . $to . '.pdf');
     }
-} 
+}

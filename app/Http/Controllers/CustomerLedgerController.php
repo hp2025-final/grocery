@@ -11,12 +11,14 @@ class CustomerLedgerController extends Controller
 {
     public function show($customerId, Request $request)
     {
-        $customer = Customer::findOrFail($customerId);
-        $from = $request->input('from');
-        $to = $request->input('to');
+        $customer = \App\Models\Customer::findOrFail($customerId);
 
-        // Get all sale and receipt IDs for this customer
-        $saleIds = $customer->sales()->pluck('id')->toArray();
+        // Get date filters with defaults
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
+
+        // Get all sales for this customer
+        $saleIds = \App\Models\Sale::where('customer_id', $customerId)->pluck('id')->toArray();
         $receiptIds = $customer->receipts()->pluck('id')->toArray();
 
         // Fetch all relevant journal entries for this customer

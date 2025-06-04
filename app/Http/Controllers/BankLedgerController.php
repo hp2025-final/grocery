@@ -19,8 +19,10 @@ class BankLedgerController extends Controller
     public function show($bankId, Request $request)
     {
         $bank = Bank::findOrFail($bankId);
-        $from = $request->input('from');
-        $to = $request->input('to');
+        
+        // Get date filters with defaults
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
 
         $accountId = $bank->account_id;
         $query = DB::table('journal_entry_lines')

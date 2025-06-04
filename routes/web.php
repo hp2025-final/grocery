@@ -29,20 +29,12 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
 
     Route::get('/expenses/table', [App\Http\Controllers\ExpensesController::class, 'tableAjax'])->name('expenses.tableAjax');
 
-    // Placeholder module routes
-    Route::get('/sales/create', [App\Http\Controllers\SaleController::class, 'create'])->name('sales.create');
-    Route::post('/sales', [App\Http\Controllers\SaleController::class, 'store'])->name('sales.store');
-    Route::get('/sales/{id}', [App\Http\Controllers\SaleController::class, 'show'])->name('sales.show');
-
     // Expense Accounts
     Route::get('/expense-accounts', [App\Http\Controllers\ExpenseAccountController::class, 'index'])->name('expense_accounts.index');
     Route::get('/expense-accounts/create', [App\Http\Controllers\ExpenseAccountController::class, 'create'])->name('expense-accounts.create');
     Route::post('/expense-accounts', [App\Http\Controllers\ExpenseAccountController::class, 'store'])->name('expense-accounts.store');
     Route::get('/expense-accounts/{id}/ledger', [App\Http\Controllers\ExpenseAccountController::class, 'ledger'])->name('accounts.ledger');
     Route::get('/expense-accounts/{id}/ledger/filter', [App\Http\Controllers\ExpenseAccountController::class, 'ledgerFilter'])->name('expense-accounts.ledger.filter');
-    Route::get('/sales/{id}/edit', [App\Http\Controllers\SaleController::class, 'edit'])->name('sales.edit');
-    Route::put('/sales/{id}', [App\Http\Controllers\SaleController::class, 'update'])->name('sales.update');
-    // Sales routes are now in routes/sales.php
 
     // Customers
     Route::get('/customers/create', [App\Http\Controllers\CustomerController::class, 'create'])->name('customers.create');

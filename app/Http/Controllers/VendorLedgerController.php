@@ -15,9 +15,11 @@ class VendorLedgerController extends Controller
 {
     public function show($vendorId, Request $request)
     {
-        $vendor = Vendor::findOrFail($vendorId);
-        $from = $request->input('from', now()->startOfYear()->toDateString());
-        $to = $request->input('to', now()->toDateString());
+        $vendor = \App\Models\Vendor::with('account')->findOrFail($vendorId);
+
+        // Get date filters with defaults
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
 
         $rows = $this->getLedgerData($vendor, $from, $to);
         return view('vendors.ledger', compact('vendor', 'rows', 'from', 'to'));

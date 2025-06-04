@@ -13,9 +13,9 @@ class InventoryLedgerController extends Controller
     {
         $inventory = Inventory::findOrFail($id);
 
-        // Get filters from request
-        $from = request('from');
-        $to = request('to');
+        // Get filters from request with defaults
+        $from = request('from', '2025-01-01');
+        $to = request('to', date('Y-m-d'));
         $partySearch = request('party_search');
 
         // Use a single raw SQL to merge opening, purchases, and sales, ordered by date
@@ -256,9 +256,9 @@ class InventoryLedgerController extends Controller
     {
         $inventory = Inventory::findOrFail($id);
 
-        // Get filters
-        $from = request('from');
-        $to = request('to');
+        // Get filters with defaults
+        $from = request('from', '2025-01-01');
+        $to = request('to', date('Y-m-d'));
         $partySearch = request('party_search');
 
         // Use a single raw SQL to merge opening, purchases, and sales, ordered by date

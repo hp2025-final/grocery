@@ -12,10 +12,9 @@ class InventoryBalancesController extends Controller
 {
     public function index(Request $request)
     {
-        // Get date filters, default to current date
-        $today = date('Y-m-d');
-        $from = $request->input('from', $today);
-        $to = $request->input('to', $today);
+        // Get date filters, default to 2025-01-01 and current date
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
         $search = $request->input('search');
 
         $query = DB::table('inventories')
@@ -91,14 +90,11 @@ class InventoryBalancesController extends Controller
             'from' => $from,
             'to' => $to
         ]);
-    }
-
-    public function exportPdf(Request $request)
+    }    public function exportPdf(Request $request)
     {
-        // Get date filters, default to current date
-        $today = date('Y-m-d');
-        $from = $request->input('from', $today);
-        $to = $request->input('to', $today);
+        // Get date filters, default to '2025-01-01' for from_date and current date for to_date
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
         $search = $request->input('search');
 
         $query = DB::table('inventories')
@@ -176,14 +172,11 @@ class InventoryBalancesController extends Controller
         ]);
 
         return $pdf->download('inventory-balances-' . $from . '-to-' . $to . '.pdf');
-    }
-
-    public function exportPdfWithoutPrices(Request $request)
+    }    public function exportPdfWithoutPrices(Request $request)
     {
-        // Get date filters, default to current date
-        $today = date('Y-m-d');
-        $from = $request->input('from', $today);
-        $to = $request->input('to', $today);
+        // Get date filters, default to '2025-01-01' for from_date and current date for to_date
+        $from = $request->input('from', '2025-01-01');
+        $to = $request->input('to', date('Y-m-d'));
         $search = $request->input('search');
 
         $query = DB::table('inventories')
