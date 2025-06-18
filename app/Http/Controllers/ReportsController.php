@@ -138,12 +138,37 @@ class ReportsController extends Controller {
     public function incomeStatement(Request $request) {
         $from = $request->input('from');
         $to = $request->input('to');
+        $customerId = $request->input('customer_id');
+
+        // Get customers for the filter dropdown
+        $customers = \App\Models\Customer::orderBy('name')->get();
 
         // Income
         $incomeAccounts = \App\Models\ChartOfAccount::where('type', 'income')->pluck('id');
         $incomeQuery = \App\Models\JournalEntryLine::whereIn('account_id', $incomeAccounts);
-        if ($from) $incomeQuery->whereHas('journalEntry', function($q) use ($from) { $q->whereDate('date', '>=', $from); });
-        if ($to) $incomeQuery->whereHas('journalEntry', function($q) use ($to) { $q->whereDate('date', '<=', $to); });
+        
+        // Add customer filter to income query
+        if ($customerId) {
+            $incomeQuery->whereHas('journalEntry', function($q) use ($customerId) {
+                $q->where('reference_type', 'sale')
+                  ->whereExists(function($sq) use ($customerId) {
+                      $sq->from('sales')
+                         ->whereRaw('sales.id = journal_entries.reference_id')
+                         ->where('sales.customer_id', $customerId);
+                  });
+            });
+        }
+
+        if ($from) {
+            $incomeQuery->whereHas('journalEntry', function($q) use ($from) { 
+                $q->whereDate('date', '>=', $from); 
+            });
+        }
+        if ($to) {
+            $incomeQuery->whereHas('journalEntry', function($q) use ($to) { 
+                $q->whereDate('date', '<=', $to); 
+            });
+        }
         $totalIncome = $incomeQuery->sum('credit');
 
         // COGS (Cost of Goods Sold)
@@ -151,8 +176,29 @@ class ReportsController extends Controller {
         $cogs = 0;
         if ($cogsAccount) {
             $cogsQuery = \App\Models\JournalEntryLine::where('account_id', $cogsAccount->id);
-            if ($from) $cogsQuery->whereHas('journalEntry', function($q) use ($from) { $q->whereDate('date', '>=', $from); });
-            if ($to) $cogsQuery->whereHas('journalEntry', function($q) use ($to) { $q->whereDate('date', '<=', $to); });
+            
+            // Apply customer filter to COGS
+            if ($customerId) {
+                $cogsQuery->whereHas('journalEntry', function($q) use ($customerId) {
+                    $q->where('reference_type', 'sale')
+                      ->whereExists(function($sq) use ($customerId) {
+                          $sq->from('sales')
+                             ->whereRaw('sales.id = journal_entries.reference_id')
+                             ->where('sales.customer_id', $customerId);
+                      });
+                });
+            }
+
+            if ($from) {
+                $cogsQuery->whereHas('journalEntry', function($q) use ($from) { 
+                    $q->whereDate('date', '>=', $from); 
+                });
+            }
+            if ($to) {
+                $cogsQuery->whereHas('journalEntry', function($q) use ($to) { 
+                    $q->whereDate('date', '<=', $to); 
+                });
+            }
             $cogs = $cogsQuery->sum('debit');
         }
 
@@ -162,15 +208,45 @@ class ReportsController extends Controller {
             return !$cogsAccount || $id != $cogsAccount->id;
         });
         $operatingExpenseQuery = \App\Models\JournalEntryLine::whereIn('account_id', $operatingExpenseAccounts);
-        if ($from) $operatingExpenseQuery->whereHas('journalEntry', function($q) use ($from) { $q->whereDate('date', '>=', $from); });
-        if ($to) $operatingExpenseQuery->whereHas('journalEntry', function($q) use ($to) { $q->whereDate('date', '<=', $to); });
+
+        // Apply customer filter to operating expenses if relevant
+        if ($customerId) {
+            $operatingExpenseQuery->whereHas('journalEntry', function($q) use ($customerId) {
+                $q->where('reference_type', 'sale')
+                  ->whereExists(function($sq) use ($customerId) {
+                      $sq->from('sales')
+                         ->whereRaw('sales.id = journal_entries.reference_id')
+                         ->where('sales.customer_id', $customerId);
+                  });
+            });
+        }
+
+        if ($from) {
+            $operatingExpenseQuery->whereHas('journalEntry', function($q) use ($from) { 
+                $q->whereDate('date', '>=', $from); 
+            });
+        }
+        if ($to) {
+            $operatingExpenseQuery->whereHas('journalEntry', function($q) use ($to) { 
+                $q->whereDate('date', '<=', $to); 
+            });
+        }
         $operatingExpenses = $operatingExpenseQuery->sum('debit');
 
         // Gross Profit and Operating Profit
         $grossProfit = $totalIncome - $cogs;
         $operatingProfit = $grossProfit - $operatingExpenses;
 
-        return view('reports.income_statement', compact('totalIncome', 'cogs', 'grossProfit', 'operatingExpenses', 'operatingProfit', 'from', 'to'));
+        return view('reports.income_statement', compact(
+            'totalIncome', 
+            'cogs', 
+            'grossProfit', 
+            'operatingExpenses', 
+            'operatingProfit', 
+            'from', 
+            'to', 
+            'customers'
+        ));
     }
     public function balanceSheet(Request $request) {
         $asOf = $request->input('as_of') ?: date('Y-m-d');

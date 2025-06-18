@@ -11,6 +11,15 @@
             <label class="block text-xs md:text-sm font-medium text-gray-700">To</label>
             <input type="date" name="to" value="{{ request('to') }}" class="mt-1 block w-full border border-gray-300 rounded px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm">
         </div>
+        <div>
+            <label class="block text-xs md:text-sm font-medium text-gray-700">Customer</label>
+            <select name="customer_id" class="mt-1 block w-full border border-gray-300 rounded px-2 py-1 md:px-3 md:py-2 text-xs md:text-sm">
+                <option value="">All Customers</option>
+                @foreach($customers as $customer)
+                    <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+                @endforeach
+            </select>
+        </div>
         <button type="submit" class="bg-gray-900 text-white px-3 py-1 md:px-4 md:py-2 rounded text-xs md:text-sm">Filter</button>
     </form>
     <div class="overflow-x-auto">
