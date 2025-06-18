@@ -118,8 +118,7 @@
                         <select name="customer_id" x-model="customerId" class="block w-full rounded border border-gray-300 px-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400" required>
                             <option value="">Select Customer</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                            @endforeach
+                                <option value="{{ $customer->id }}">{{ $customer->name }}</option>                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -236,9 +235,8 @@ function salesForm() {
         discount: 0,
         notes: '',
         saleDate: '{{ date('Y-m-d') }}',
-        customerId: '',
-        saleId: '',
-        editMode: false,        filteredProducts(idx) {
+        customerId: '',        saleId: '',
+        editMode: false,filteredProducts(idx) {
             const categoryId = parseInt(this.items[idx].category_id);
             return this.products.filter(p => !categoryId || parseInt(p.category_id) === categoryId);
         },
@@ -290,10 +288,8 @@ function salesForm() {
             this.discount = 0;
             this.notes = '';
             this.items = [{ product_id: '', category_id: '', quantity: 1, unit_price: 0, unit_name: '', total: 0 }];
-        },
-        submitForm(e) {
-            // Set form fields before submit
-            document.querySelector('input[name="sale_date"]').value = this.saleDate;
+        },        submitForm(e) {
+            // Set form fields before submit            document.querySelector('input[name="sale_date"]').value = this.saleDate;
             document.querySelector('select[name="customer_id"]').value = this.customerId;
             document.querySelector('input[name="discount"]').value = this.discount;
             document.querySelector('textarea[name="notes"]').value = this.notes;

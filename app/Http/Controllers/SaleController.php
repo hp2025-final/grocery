@@ -98,26 +98,27 @@ class SaleController extends Controller {
             'products.*.quantity' => 'required|numeric|min:0.01',
             'products.*.unit_price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
-            'notes' => 'required|string|max:1000',
+            'notes' => 'required|string|max:1000'
         ]);
 
         try {
             \DB::beginTransaction();
 
             $sale = new Sale();
-        $sale->customer_id = $validated['customer_id'];
-        $sale->sale_date = $validated['sale_date'];
+            $sale->customer_id = $validated['customer_id'];
+            $sale->sale_date = $validated['sale_date'];
             
-        // Generate unique sale_number
+            // Generate unique sale_number
             $lastSale = Sale::orderByDesc('id')->first();
-        $nextNumber = $lastSale ? ((int)substr($lastSale->sale_number, 4)) + 1 : 1;
-        $sale->sale_number = 'SAL-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            $nextNumber = $lastSale ? ((int)substr($lastSale->sale_number, 4)) + 1 : 1;
+            $sale->sale_number = 'SAL-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
             
-        $sale->discount_amount = $validated['discount'] ?? 0;
-        $sale->notes = $validated['notes'] ?? null;
+            $sale->discount_amount = $validated['discount'] ?? 0;
+            $sale->notes = $validated['notes'] ?? null;
+            $sale->payment_status = 'Unpaid'; // Default status
             $sale->total_amount = 0;
             $sale->net_amount = 0;
-        $sale->save();
+            $sale->save();
 
         $subtotal = 0;
         foreach ($validated['products'] as $item) {
@@ -292,6 +293,7 @@ class SaleController extends Controller {
             'products.*.unit_price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'notes' => 'required|string|max:1000',
+            'payment_status' => 'required|in:Paid,Unpaid,Partial'
         ]);
 
         $sale = \App\Models\Sale::findOrFail($id);
@@ -299,6 +301,7 @@ class SaleController extends Controller {
         $sale->sale_date = $validated['sale_date'];
         $sale->discount_amount = $validated['discount'] ?? 0;
         $sale->notes = $validated['notes'] ?? null;
+        $sale->payment_status = $validated['payment_status'];
         $sale->save();
 
         // Remove old items

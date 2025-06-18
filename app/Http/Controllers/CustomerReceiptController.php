@@ -192,5 +192,123 @@ class CustomerReceiptController extends Controller
 
         return $pdf->download('customer_receipts_'.date('Y-m-d').'.pdf');
     }
+
+    public function createFromSale($saleId)
+    {
+        $sale = \App\Models\Sale::with('customer')->findOrFail($saleId);
+        
+        // Check if sale exists and is unpaid
+        if (!$sale) {
+            return redirect()->route('sales.index')->with('error', 'Sale not found.');
+        }
+        
+        if ($sale->payment_status === 'Paid') {
+            return redirect()->route('sales.index')->with('error', 'This sale is already paid.');
+        }
+
+        // Get all active banks
+        $banks = \App\Models\Bank::orderBy('name')->get();
+        
+        return view('sales._create_receipt_modal', compact('sale', 'banks'));
+    }
+
+    public function storeFromSale(Request $request)
+    {
+        try {
+            \Log::info('Received request data:', $request->all());
+
+            $validated = $request->validate([
+                'sale_id' => 'required|exists:sales,id',
+                'payment_account_id' => 'required|exists:banks,id',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+
+            \Log::info('Validation passed:', $validated);
+
+            DB::transaction(function () use ($request) {
+                $sale = \App\Models\Sale::with('customer')->findOrFail($request->sale_id);
+                \Log::info('Found sale:', ['sale_id' => $sale->id, 'amount' => $sale->net_amount]);
+                
+                if ($sale->payment_status === 'Paid') {
+                    throw new \Exception('This sale is already paid.');
+                }
+
+                // Get bank account ID from Bank model
+                $bank = \App\Models\Bank::findOrFail($request->payment_account_id);
+                \Log::info('Found bank:', ['bank_id' => $bank->id, 'account_id' => $bank->account_id]);
+                
+                if (!$bank || !$bank->account_id) {
+                    throw new \Exception('Selected bank does not have a linked account.');
+                }
+
+                // Auto-generate receipt number
+                $last = CustomerReceipt::orderByDesc('id')->first();
+                $nextNum = $last ? (intval(substr($last->receipt_number, 4)) + 1) : 1;
+                $receipt_number = 'RPT-' . str_pad($nextNum, 6, '0', STR_PAD_LEFT);
+                \Log::info('Generated receipt number:', ['receipt_number' => $receipt_number]);
+
+                // Create receipt
+                $receipt = CustomerReceipt::create([
+                    'receipt_number' => $receipt_number,
+                    'customer_id' => $sale->customer_id,
+                    'receipt_date' => now(),
+                    'amount_received' => $sale->net_amount,
+                    'payment_account_id' => $bank->account_id,
+                    'bank_id' => $bank->id,
+                    'payment_method' => 'Bank',  // Adding default payment method
+                    'reference' => 'Sale #' . $sale->sale_number,
+                    'notes' => $request->notes,
+                ]);
+                \Log::info('Created receipt:', ['receipt_id' => $receipt->id]);
+
+                // Create journal entry
+                $journal = new \App\Models\JournalEntry();
+                $lastEntry = \App\Models\JournalEntry::orderByRaw('CAST(entry_number AS UNSIGNED) DESC')->first();
+                $nextEntryNumber = $lastEntry ? ((int)$lastEntry->entry_number + 1) : 1;
+                
+                $journal->entry_number = (string)$nextEntryNumber;
+                $journal->date = now();
+                $journal->description = 'Receipt from customer: ' . $sale->customer->name . ' for Sale #' . $sale->sale_number;
+                $journal->reference_type = 'customer_receipt';
+                $journal->reference_id = $receipt->id;
+                $journal->created_by = auth()->id();
+                $journal->save();
+                \Log::info('Created journal entry:', ['journal_id' => $journal->id]);
+
+                // Create journal entry lines
+                $journal->lines()->createMany([
+                    [
+                        'account_id' => $bank->account_id,
+                        'debit' => $sale->net_amount,
+                        'credit' => null,
+                        'description' => 'Receipt in Bank',
+                    ],
+                    [
+                        'account_id' => $sale->customer->account_id,
+                        'debit' => null,
+                        'credit' => $sale->net_amount,
+                        'description' => 'Customer payment for Sale #' . $sale->sale_number,
+                    ],
+                ]);
+                \Log::info('Created journal entry lines');
+
+                // Update sale status to Paid
+                $sale->payment_status = 'Paid';
+                $sale->save();
+                \Log::info('Updated sale status to Paid');
+            });
+
+            return redirect()->route('sales.index')->with('success', 'Receipt created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Error in storeFromSale:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating receipt: ' . $e->getMessage());
+        }
+    }
 }
 

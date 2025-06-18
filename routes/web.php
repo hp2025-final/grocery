@@ -159,3 +159,5 @@ require __DIR__.'/auth.php';
 // Customer Receipt routes
 Route::get('/customer-receipts/export-pdf/{id}', [App\Http\Controllers\CustomerReceiptController::class, 'exportPdf'])->name('customer-receipts.export-pdf');
 Route::get('/customer-receipts/export-table', [App\Http\Controllers\CustomerReceiptController::class, 'exportTable'])->name('customer-receipts.export-table');
+Route::get('/customer-receipts/{sale}/create-from-sale', [App\Http\Controllers\CustomerReceiptController::class, 'createFromSale'])->name('customer-receipts.create-from-sale');
+Route::post('/customer-receipts/store-from-sale', [App\Http\Controllers\CustomerReceiptController::class, 'storeFromSale'])->name('customer-receipts.store-from-sale');
