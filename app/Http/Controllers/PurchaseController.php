@@ -57,6 +57,7 @@ class PurchaseController extends Controller {
         $purchase->purchase_date = $validated['purchase_date'];
         $purchase->discount_amount = $validated['discount'] ?? 0;
         $purchase->notes = $validated['notes'] ?? null;
+        $purchase->payment_status = 'Unpaid'; // Set default payment status
         $purchase->total_amount = 0; // will update after items
         $purchase->net_amount = 0; // will update after items
         $purchase->save();
@@ -245,6 +246,7 @@ class PurchaseController extends Controller {
         $purchase->purchase_date = $validated['purchase_date'];
         $purchase->discount_amount = $validated['discount'] ?? 0;
         $purchase->notes = $validated['notes'] ?? null;
+        $purchase->payment_status = 'Unpaid'; // Set default payment status
         $purchase->total_amount = 0; // will update after items
         $purchase->net_amount = 0; // will update after items
         $purchase->save();

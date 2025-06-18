@@ -172,5 +172,113 @@ class VendorPaymentController extends Controller {
 
         return $pdf->download('vendor_payments_'.date('Y-m-d').'.pdf');
     }
+
+    public function createFromPurchase($purchaseId)
+    {
+        $purchase = \App\Models\Purchase::with('vendor')->findOrFail($purchaseId);
+        
+        // Check if purchase exists and is unpaid
+        if (!$purchase) {
+            return redirect()->route('purchases.index')->with('error', 'Purchase not found.');
+        }
+        
+        if ($purchase->payment_status === 'Paid') {
+            return redirect()->route('purchases.index')->with('error', 'This purchase is already paid.');
+        }
+
+        // Get all active banks
+        $banks = \App\Models\Bank::orderBy('name')->get();
+        
+        return view('purchases._create_payment_modal', compact('purchase', 'banks'));
+    }
+
+    public function storeFromPurchase(Request $request)
+    {
+        try {
+            \Log::info('Received request data:', $request->all());
+
+            $validated = $request->validate([
+                'purchase_id' => 'required|exists:purchases,id',
+                'payment_account_id' => 'required|exists:banks,id',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+
+            DB::transaction(function () use ($request) {
+                $purchase = \App\Models\Purchase::with('vendor')->findOrFail($request->purchase_id);
+                
+                if ($purchase->payment_status === 'Paid') {
+                    throw new \Exception('This purchase is already paid.');
+                }
+
+                // Get bank account ID from Bank model
+                $bank = \App\Models\Bank::findOrFail($request->payment_account_id);
+                if (!$bank || !$bank->account_id) {
+                    throw new \Exception('Selected bank does not have a linked account.');
+                }
+
+                // Auto-generate payment number
+                $last = VendorPayment::orderByDesc('id')->first();
+                $nextNum = $last ? (intval(substr($last->payment_number, 4)) + 1) : 1;
+                $payment_number = 'PAY-' . str_pad($nextNum, 6, '0', STR_PAD_LEFT);
+
+                // Create payment
+                $payment = VendorPayment::create([
+                    'payment_number' => $payment_number,
+                    'vendor_id' => $purchase->vendor_id,
+                    'payment_date' => now(),
+                    'amount_paid' => $purchase->net_amount,
+                    'payment_account_id' => $bank->account_id,
+                    'bank_id' => $bank->id,
+                    'payment_method' => 'Bank',
+                    'reference' => 'Purchase #' . $purchase->purchase_number,
+                    'notes' => $request->notes,
+                ]);
+
+                // Create journal entry
+                $journal = new \App\Models\JournalEntry();
+                $lastEntry = \App\Models\JournalEntry::orderByRaw('CAST(entry_number AS UNSIGNED) DESC')->first();
+                $nextEntryNumber = $lastEntry ? ((int)$lastEntry->entry_number + 1) : 1;
+                
+                $journal->entry_number = (string)$nextEntryNumber;
+                $journal->date = now();
+                $journal->description = 'Payment to vendor: ' . $purchase->vendor->name . ' for Purchase #' . $purchase->purchase_number;
+                $journal->reference_type = 'vendor_payment';
+                $journal->reference_id = $payment->id;
+                $journal->created_by = auth()->id();
+                $journal->save();
+
+                // Create journal entry lines
+                $journal->lines()->createMany([
+                    [
+                        'account_id' => $purchase->vendor->account_id,
+                        'debit' => $purchase->net_amount,
+                        'credit' => null,
+                        'description' => 'Vendor Payment for Purchase #' . $purchase->purchase_number,
+                    ],
+                    [
+                        'account_id' => $bank->account_id,
+                        'debit' => null,
+                        'credit' => $purchase->net_amount,
+                        'description' => 'Payment from Bank',
+                    ],
+                ]);
+
+                // Update purchase status to Paid
+                $purchase->payment_status = 'Paid';
+                $purchase->save();
+            });
+
+            return redirect()->route('purchases.index')->with('success', 'Payment created successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Error in storeFromPurchase:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Error creating payment: ' . $e->getMessage()]);
+        }
+    }
 }
 

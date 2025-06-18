@@ -90,6 +90,8 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::delete('/vendor-payments/{id}', [App\Http\Controllers\VendorPaymentController::class, 'destroy'])->name('vendor-payments.destroy');
     Route::get('/vendor-payments/export-pdf/{id}', [App\Http\Controllers\VendorPaymentController::class, 'exportPdf'])->name('vendor-payments.export-pdf');
     Route::get('/vendor-payments/export-table', [App\Http\Controllers\VendorPaymentController::class, 'exportTable'])->name('vendor-payments.export-table');
+    Route::get('/vendor-payments/{purchase}/create-from-purchase', [App\Http\Controllers\VendorPaymentController::class, 'createFromPurchase'])->name('vendor-payments.create-from-purchase');
+    Route::post('/vendor-payments/store-from-purchase', [App\Http\Controllers\VendorPaymentController::class, 'storeFromPurchase'])->name('vendor-payments.store-from-purchase');
     Route::get('/stock-adjustments/create', [App\Http\Controllers\StockAdjustmentController::class, 'create'])->name('stock-adjustments.create');
     Route::post('/stock-adjustments', [App\Http\Controllers\StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
     Route::get('/stock-adjustments', [App\Http\Controllers\StockAdjustmentsController::class, 'index'])->name('stock-adjustments.index');
