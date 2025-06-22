@@ -292,8 +292,8 @@ class SaleController extends Controller {
             'products.*.quantity' => 'required|numeric|min:0.01',
             'products.*.unit_price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
-            'notes' => 'required|string|max:1000',
-            'payment_status' => 'required|in:Paid,Unpaid,Partial'
+            'notes' => 'required|string|max:1000'
+            // payment_status is handled automatically by the controller
         ]);
 
         $sale = \App\Models\Sale::findOrFail($id);
@@ -301,7 +301,7 @@ class SaleController extends Controller {
         $sale->sale_date = $validated['sale_date'];
         $sale->discount_amount = $validated['discount'] ?? 0;
         $sale->notes = $validated['notes'] ?? null;
-        $sale->payment_status = $validated['payment_status'];
+        // Keep existing payment status
         $sale->save();
 
         // Remove old items
@@ -447,7 +447,31 @@ class SaleController extends Controller {
     }
 
     public function show($id) {
-        $sale = Sale::with(['customer', 'items.product', 'items.unit'])->findOrFail($id);
+        $sale = Sale::with([
+            'customer',
+            'items.product',
+            'items.unit',
+            'items' => function($query) {
+                $query->orderBy('id', 'asc');
+            }
+        ])->findOrFail($id);
+        
+        if (!$sale) {
+            abort(404, 'Sale not found');
+        }
+
+        // Make sure all relationships are loaded
+        if ($sale->items) {
+            foreach ($sale->items as $item) {
+                if (!$item->product) {
+                    \Log::warning("Sale {$sale->id} has item {$item->id} with missing product");
+                }
+                if (!$item->unit) {
+                    \Log::warning("Sale {$sale->id} has item {$item->id} with missing unit");
+                }
+            }
+        }
+
         return view('sales.invoice', compact('sale'));
     }
 }

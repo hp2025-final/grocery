@@ -134,7 +134,7 @@
                                         x-model="item.product_id" @change="updateUnit(idx)" required>
                                         <option value="">Select</option>
                                         <template x-for="product in products" :key="product.id">
-                                            <option :value="product.id" x-text="product.name"></option>
+                                            <option :value="product.id.toString()" :selected="item.product_id.toString() === product.id.toString()" x-text="product.name"></option>
                                         </template>
                                 </select>
                                 </div>
@@ -224,7 +224,7 @@ function purchaseForm() {
         products: @json($products),
         items: {!! json_encode($purchase->items->map(function($item) {
             return [
-                'product_id' => $item->product_id,
+                'product_id' => (string)$item->product_id,
                 'quantity' => $item->quantity,
                 'unit_price' => $item->rate,
                 'unit_name' => $item->unit->name ?? '',

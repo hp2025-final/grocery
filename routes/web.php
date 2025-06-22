@@ -67,7 +67,7 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::post('/purchases', [App\Http\Controllers\PurchaseController::class, 'store'])->name('purchases.store');
     Route::get('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'show'])->name('purchases.show');
     Route::get('/purchases/{id}/edit', [App\Http\Controllers\PurchaseController::class, 'edit'])->name('purchases.edit');
-    Route::put('/purchases/{id}', [App\HttpControllers\PurchaseController::class, 'update'])->name('purchases.update');
+    Route::put('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'update'])->name('purchases.update');
     Route::delete('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'destroy'])->name('purchases.destroy');
     Route::get('/purchases', [App\Http\Controllers\PurchasesController::class, 'index'])->name('purchases.index');
     Route::get('/purchases/{id}/pdf', [App\Http\Controllers\PurchasesController::class, 'exportPdf'])->name('purchases.pdf');

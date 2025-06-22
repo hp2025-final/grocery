@@ -114,11 +114,11 @@
                             @foreach($sale->items as $index => $item)
                             <tr>
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $index + 1 }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900">{{ $item->product->name }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->quantity, 2) }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $item->unit->name ?? '-' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->rate, 2) }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->total_amount, 2) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">{{ $item->product ? $item->product->name : 'N/A' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->quantity ?? 0, 2) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ $item->unit ? $item->unit->name : '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->rate ?? 0, 2) }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 text-right">{{ number_format($item->total_amount ?? 0, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
