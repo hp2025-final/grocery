@@ -36,20 +36,27 @@ class SaleController extends Controller {
     public function edit($id) {
         $sale = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])->findOrFail($id);
         $customers = \App\Models\Customer::orderBy('name')->get();
-        $products = \App\Models\Inventory::orderBy('name')->get()->map(function($p) {
-    return [
-        'id' => $p->id,
-        'name' => $p->name,
-        'unit_name' => $p->unit,
-        'sale_price' => $p->sale_price,
-    ];
-})->values()->toArray();
+        $categories = \App\Models\InventoryCategory::orderBy('name')->get();
+        
+        $products = \App\Models\Inventory::with('category')
+            ->orderBy('name')
+            ->get()
+            ->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'unit_name' => $p->unit,
+                    'sale_price' => $p->sale_price,
+                    'category_id' => $p->category_id
+                ];
+            })->values()->toArray();
 
         // Add paginated sales list limited to last 50 records
         $search = request()->input('search');
         $salesQuery = \App\Models\Sale::with(['customer', 'items.product', 'items.unit'])
             ->orderByDesc('sale_date')
-            ->take(50); // Limit to last 50 invoices
+            ->take(50);
+        
         if ($search) {
             $salesQuery->where(function($q) use ($search) {
                 $q->where('sale_number', 'like', "%$search%")
@@ -58,20 +65,10 @@ class SaleController extends Controller {
                   });
             });
         }
+        
         $sales = $salesQuery->paginate(10)->withQueryString();
 
-        // Map the sale items to match the expected format
-        $saleItems = $sale->items->map(function($item) {
-            return [
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'unit_price' => $item->rate,
-                'unit_name' => $item->unit->name ?? '',
-                'total' => $item->total_amount
-            ];
-        })->toArray();
-
-        return view('sales.edit', compact('sale', 'customers', 'products', 'sales', 'search', 'saleItems'));
+        return view('sales.edit', compact('sale', 'customers', 'categories', 'products', 'sales', 'search'));
     }
 
     public function destroy($id) {
@@ -293,73 +290,65 @@ class SaleController extends Controller {
             'products.*.unit_price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'notes' => 'required|string|max:1000'
-            // payment_status is handled automatically by the controller
         ]);
 
-        $sale = \App\Models\Sale::findOrFail($id);
-        $sale->customer_id = $validated['customer_id'];
-        $sale->sale_date = $validated['sale_date'];
-        $sale->discount_amount = $validated['discount'] ?? 0;
-        $sale->notes = $validated['notes'] ?? null;
-        // Keep existing payment status
-        $sale->save();
+        try {
+            \DB::beginTransaction();
 
-        // Remove old items
-        $sale->items()->delete();
-        $subtotal = 0;
-        foreach ($validated['products'] as $item) {
-            $inventory = \App\Models\Inventory::query()->where('id', $item['product_id'])->first();
-            $lineTotal = $item['quantity'] * $item['unit_price'];
-            $unitId = null;
-            if ($inventory && $inventory->unit) {
-                $unitModel = \App\Models\Unit::firstOrCreate(
-                    ['name' => $inventory->unit],
-                    ['abbreviation' => $inventory->unit]
-                );
-                $unitId = $unitModel->id;
-            }
-            // Ensure product category exists and get its ID
-            $productCategoryId = null;
-            if ($inventory->category_id) {
-                $inventoryCategory = \App\Models\InventoryCategory::find($inventory->category_id);
-                if ($inventoryCategory) {
-                    $productCategory = \App\Models\ProductCategory::firstOrCreate(
-                        ['name' => $inventoryCategory->name],
-                        ['description' => $inventoryCategory->name]
+            $sale = \App\Models\Sale::findOrFail($id);
+            $sale->customer_id = $validated['customer_id'];
+            $sale->sale_date = $validated['sale_date'];
+            $sale->discount_amount = $validated['discount'] ?? 0;
+            $sale->notes = $validated['notes'];
+            // Keep existing payment status
+            $sale->save();
+
+            // Remove old items
+            $sale->items()->delete();
+            
+            $subtotal = 0;
+            foreach ($validated['products'] as $item) {
+                $inventory = \App\Models\Inventory::query()->where('id', $item['product_id'])->first();
+                $lineTotal = $item['quantity'] * $item['unit_price'];
+                
+                $unitId = null;
+                if ($inventory && $inventory->unit) {
+                    $unitModel = \App\Models\Unit::firstOrCreate(
+                        ['name' => $inventory->unit],
+                        ['abbreviation' => $inventory->unit]
                     );
-                    $productCategoryId = $productCategory->id;
+                    $unitId = $unitModel->id;
                 }
+                
+                // Create sale item using inventory ID directly
+                $sale->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'unit_id' => $unitId,
+                    'rate' => $item['unit_price'],
+                    'total_amount' => $lineTotal,
+                ]);
+                
+                $subtotal += $lineTotal;
             }
-            $productModel = \App\Models\Product::firstOrCreate([
-                'name' => $inventory->name,
-                'category_id' => $productCategoryId,
-                'unit_id' => $unitId
-            ]);
-            $sale->items()->create([
-                'product_id' => $productModel->id,
-                'quantity' => $item['quantity'],
-                'unit_id' => $unitId,
-                'rate' => $item['unit_price'],
-                'total_amount' => $lineTotal,
-            ]);
-            $subtotal += $lineTotal;
-        }
-        $sale->total_amount = $subtotal;
-        $sale->net_amount = $subtotal - ($sale->discount_amount ?? 0);
-        $sale->save();
+            
+            $sale->total_amount = $subtotal;
+            $sale->net_amount = $subtotal - ($sale->discount_amount ?? 0);
+            $sale->save();
 
-        // --- Update Journal Entries ---
-        \DB::transaction(function () use ($sale) {
+            // --- Update Journal Entries ---
             // Delete old journal entries and lines for this sale
             $journalEntries = \App\Models\JournalEntry::where('reference_type', 'sale')->where('reference_id', $sale->id)->get();
             foreach ($journalEntries as $entry) {
                 $entry->lines()->delete();
                 $entry->delete();
             }
+            
             // Recreate journal entry (same logic as store)
             $amount = $sale->total_amount;
             $discount = $sale->discount_amount ?? 0;
             $net = $sale->net_amount;
+            
             // Get relevant accounts
             $salesIncome = \App\Models\ChartOfAccount::where('type', 'Income')->where(function($q) {
                 $q->where('code', '4001')->orWhere('name', 'Sales')->orWhere('name', 'Sales Revenue');
@@ -369,6 +358,7 @@ class SaleController extends Controller {
             })->first();
             $customerModel = \App\Models\Customer::find($sale->customer_id);
             $customerAccount = $customerModel ? $customerModel->account : null;
+            
             if (!$salesIncome || !$customerAccount) {
                 \Log::error('SaleController: Required account(s) not found for sales journal entry.', [
                     'salesIncome' => $salesIncome,
@@ -376,10 +366,12 @@ class SaleController extends Controller {
                 ]);
                 throw new \Exception('Required account(s) not found for sales journal entry.');
             }
+            
             // Generate journal entry number
             $last = \App\Models\JournalEntry::where('entry_number', 'like', 'INV-%')->orderByDesc('id')->first();
             $nextNum = $last ? (intval(substr($last->entry_number, 4)) + 1) : 1;
             $entryNumber = 'INV-' . str_pad($nextNum, 6, '0', STR_PAD_LEFT);
+            
             $entry = new \App\Models\JournalEntry([
                 'entry_number' => $entryNumber,
                 'entry_date' => $sale->sale_date,
@@ -390,6 +382,7 @@ class SaleController extends Controller {
                 'created_by' => auth()->id() ?? 1,
             ]);
             $entry->save();
+            
             // Credit Sales Income
             $entry->lines()->create([
                 'account_id' => $salesIncome->id,
@@ -397,6 +390,7 @@ class SaleController extends Controller {
                 'debit' => 0,
                 'description' => 'Sales Income'
             ]);
+            
             // Debit Customer
             if ($customerAccount) {
                 $entry->lines()->create([
@@ -406,6 +400,7 @@ class SaleController extends Controller {
                     'description' => 'Accounts Receivable'
                 ]);
             }
+            
             // Debit Discount Allowed (if any)
             if ($discount > 0 && $discountAllowed) {
                 $entry->lines()->create([
@@ -415,6 +410,7 @@ class SaleController extends Controller {
                     'description' => 'Discount Allowed'
                 ]);
             }
+            
             // --- COGS and Inventory Journal Entries ---
             $cogsAccount = \App\Models\ChartOfAccount::where('name', 'Cost of Goods Sold')->first();
             $inventoryAccount = \App\Models\ChartOfAccount::where('name', 'Inventory')->first();
@@ -440,10 +436,18 @@ class SaleController extends Controller {
                 ]);
             }
             // --- END COGS and Inventory Journal Entries ---
-        });
-        // --- End Update Journal Entries ---
 
-        return redirect()->route('sales.edit', $sale->id)->with('success', 'Sale updated successfully!');
+            \DB::commit();
+            return redirect()->route('sales.edit', $sale->id)->with('success', 'Sale updated successfully!');
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Failed to update sale', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to update sale: ' . $e->getMessage()])->withInput();
+        }
     }
 
     public function show($id) {
