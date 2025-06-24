@@ -5,10 +5,12 @@ class PurchaseController extends Controller {
     public function edit($id) {
         $purchase = \App\Models\Purchase::with(['vendor', 'items.product', 'items.unit'])->findOrFail($id);
         $vendors = \App\Models\Vendor::orderBy('name')->get();
-        $products = \App\Models\Inventory::orderBy('name')->get()->map(function($p) {
+        $categories = \App\Models\InventoryCategory::orderBy('name')->get();
+        $products = \App\Models\Inventory::with('category')->orderBy('name')->get()->map(function($p) {
             return [
                 'id' => $p->id,
                 'name' => $p->name,
+                'category_id' => $p->category_id,
                 'unit_name' => $p->unit,
                 'buy_price' => $p->buy_price,
             ];
@@ -38,7 +40,7 @@ class PurchaseController extends Controller {
             ];
         })->toArray();
 
-        return view('purchases.edit', compact('purchase', 'vendors', 'products', 'purchases', 'search', 'purchaseItems'));
+        return view('purchases.edit', compact('purchase', 'vendors', 'categories', 'products', 'purchases', 'search', 'purchaseItems'));
     }
     public function update(Request $request, $id) {
         $validated = $request->validate([
