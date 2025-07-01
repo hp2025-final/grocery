@@ -63,7 +63,10 @@ Route::middleware(['auth', 'verified', 'permission'])->group(function () {
     Route::get('/banks/{bank}/ledger', [App\Http\Controllers\BankLedgerController::class, 'show'])->name('banks.ledger');
     Route::get('/banks/{bank}/ledger/export', [App\Http\Controllers\BankLedgerController::class, 'exportPdf'])->name('banks.ledger.export');
 
-    Route::get('/purchases/create', [App\Http\Controllers\PurchaseController::class, 'create'])->name('purchases.create');
+    // Redirect /purchases/create to admin purchase form
+    Route::get('/purchases/create', function () {
+        return redirect()->route('admin.purchase-form-copy');
+    })->name('purchases.create');
     Route::post('/purchases', [App\Http\Controllers\PurchaseController::class, 'store'])->name('purchases.store');
     Route::get('/purchases/{id}', [App\Http\Controllers\PurchaseController::class, 'show'])->name('purchases.show');
     Route::get('/purchases/{id}/edit', [App\Http\Controllers\PurchaseController::class, 'edit'])->name('purchases.edit');
