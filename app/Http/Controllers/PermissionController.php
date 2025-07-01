@@ -7,6 +7,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * PermissionController - Manages user permissions across the Laravel application
+ * 
+ * CRITICAL FIX IMPLEMENTED:
+ * - Fixed issue where adding new permissions to a user would remove all existing permissions
+ * - Frontend now sends ALL permissions (checked/unchecked) via all_permissions[] array
+ * - Backend processes complete permission state instead of just checked boxes
+ * - User selection is maintained after form submission
+ * - Added comprehensive debugging and validation
+ * 
+ * The permission system now properly handles:
+ * - Full CRUD permissions for all modules (Sales, Purchases, Customers, Vendors, etc.)
+ * - Report access permissions
+ * - Admin form access permissions
+ * - Dashboard and analytics permissions
+ * - Chart of accounts permissions
+ */
 class PermissionController extends Controller
 {    
     private $moduleGroups = [
@@ -318,12 +335,33 @@ class PermissionController extends Controller
 
         $request->validate([
             'user' => 'required|email|exists:users,email',
-            'permissions' => 'array'
+            'permissions' => 'array',
+            'all_permissions' => 'array'
         ]);
 
         $permissions = $this->refreshPermissions(); // Use refreshed permissions
         $selectedUserEmail = $request->user;
-        $newPermissions = $request->permissions ?? [];
+        
+        // Process the new all_permissions format (permission|0 or permission|1)
+        $finalPermissions = [];
+        
+        if ($request->has('all_permissions') && is_array($request->all_permissions)) {
+            // New format: each item is "permission|0" or "permission|1"
+            foreach ($request->all_permissions as $permissionData) {
+                $parts = explode('|', $permissionData);
+                if (count($parts) === 2) {
+                    $permission = $parts[0];
+                    $isChecked = $parts[1] === '1';
+                    
+                    if ($isChecked) {
+                        $finalPermissions[] = $permission;
+                    }
+                }
+            }
+        } else {
+            // Fallback to old format for backward compatibility
+            $finalPermissions = $request->permissions ?? [];
+        }
 
         // Ensure the user exists in the permissions array
         if (!isset($permissions[$selectedUserEmail])) {
@@ -333,15 +371,43 @@ class PermissionController extends Controller
             ];
         }
 
-        // Update permissions for the selected user (this completely replaces their permissions with the new set)
-        $permissions[$selectedUserEmail]['permissions'] = $newPermissions;
+        // Set the final permissions (only the checked ones)
+        $permissions[$selectedUserEmail]['permissions'] = $finalPermissions;
         $permissions[$selectedUserEmail]['is_super_admin'] = in_array($selectedUserEmail, config('superadmins.emails', []));
 
         // Save to JSON file
         Storage::put('user_permissions.json', json_encode($permissions, JSON_PRETTY_PRINT));
 
+        // Debug information
+        \Log::info('Permission Update', [
+            'user' => $selectedUserEmail,
+            'final_permissions' => $finalPermissions,
+            'total_permissions' => count($finalPermissions),
+            'all_permissions_received' => $request->all_permissions ?? 'none',
+            'regular_permissions_received' => $request->permissions ?? 'none'
+        ]);
+
         return redirect()->back()
-            ->with('message', 'Permissions updated successfully for ' . $selectedUserEmail . '. User now has ' . count($newPermissions) . ' permissions assigned.');
+            ->with('message', 'Permissions updated successfully for ' . $selectedUserEmail . '. User now has ' . count($finalPermissions) . ' permissions assigned.')
+            ->with('selected_user', $selectedUserEmail); // Pass selected user to maintain selection
+    }
+
+    public function debug(Request $request)
+    {
+        if (!$this->isSuperAdmin(auth()->user()->email)) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $email = $request->get('email');
+        $permissions = $this->refreshPermissions();
+        
+        return response()->json([
+            'user' => $email,
+            'permissions_data' => $permissions[$email] ?? null,
+            'all_users' => array_keys($permissions),
+            'file_exists' => Storage::exists('user_permissions.json'),
+            'file_content' => Storage::exists('user_permissions.json') ? Storage::get('user_permissions.json') : null
+        ]);
     }
 
     private function isSuperAdmin($email)

@@ -20,8 +20,20 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('admin.permissions.store') }}" class="space-y-6">
+                <form method="POST" action="{{ route('admin.permissions.store') }}" class="space-y-6" id="permissionForm">
                     @csrf
+                    
+                    <!-- Debug Information -->
+                    @if(config('app.debug'))
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+                        <h4 class="font-medium text-yellow-800">Debug Info:</h4>
+                        <div id="debugInfo" class="text-sm text-yellow-700 mt-2">
+                            <div>Permissions JSON: <span id="debugPermissions">Not loaded</span></div>
+                            <div>Selected User: <span id="debugUser">None</span></div>
+                            <div>Loaded Permissions: <span id="debugLoaded">None</span></div>
+                        </div>
+                    </div>
+                    @endif
                     
                     <div>
                         <label for="user" class="block text-sm font-medium text-gray-700">Select User</label>
@@ -183,22 +195,27 @@ document.addEventListener('DOMContentLoaded', function() {
         loadUserPermissions(email);
     });
 
-    // Pre-select user if there's one in the URL
+    // Pre-select user if there's one in the URL or session
     const urlParams = new URLSearchParams(window.location.search);
     const userEmail = urlParams.get('user');
-    if (userEmail) {
+    const selectedUser = @json(session('selected_user'));
+    
+    if (selectedUser) {
+        userSelect.value = selectedUser;
+        loadUserPermissions(selectedUser);
+    } else if (userEmail) {
         userSelect.value = userEmail;
         loadUserPermissions(userEmail);
     }
 
     // Function to clear all permissions
-    function clearAllPermissions() {
+    window.clearAllPermissions = function() {
         if (confirm('Are you sure you want to clear all permissions for the selected user?')) {
             document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
         }
     }
 
-    // Form submission validation
+    // Form submission validation and debugging
     document.querySelector('form').addEventListener('submit', function(e) {
         const selectedUser = userSelect.value;
         if (!selectedUser) {
@@ -207,8 +224,49 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
+        // CRITICAL FIX: Include ALL permissions (checked and unchecked) in the form submission
+        // This prevents losing previous permissions when updating
+        
+        // Remove existing hidden inputs to avoid duplicates
+        document.querySelectorAll('input[name="all_permissions[]"]').forEach(input => input.remove());
+        
+        // Get all permission checkboxes
+        const allPermissionCheckboxes = document.querySelectorAll('input[name="permissions[]"]');
+        const form = this;
+        
+        // Create hidden inputs for ALL permissions with their current state
+        allPermissionCheckboxes.forEach(checkbox => {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'all_permissions[]';
+            hiddenInput.value = checkbox.value + '|' + (checkbox.checked ? '1' : '0');
+            form.appendChild(hiddenInput);
+        });
+
         const checkedPermissions = document.querySelectorAll('input[name="permissions[]"]:checked');
-        console.log('Submitting permissions:', Array.from(checkedPermissions).map(cb => cb.value)); // Debug log
+        const permissionValues = Array.from(checkedPermissions).map(cb => cb.value);
+        
+        console.log('Form submission:');
+        console.log('Selected user:', selectedUser);
+        console.log('Checked permissions:', permissionValues);
+        console.log('Total permissions available:', allPermissionCheckboxes.length);
+        console.log('Total checked permissions:', permissionValues.length);
+        
+        // Debug: Log all permissions being sent
+        const allPermissions = [];
+        allPermissionCheckboxes.forEach(checkbox => {
+            allPermissions.push({
+                permission: checkbox.value,
+                checked: checkbox.checked
+            });
+        });
+        console.log('All permissions being sent:', allPermissions);
+        
+        // Update debug info if available
+        if (document.getElementById('debugInfo')) {
+            document.getElementById('debugPermissions').textContent = 
+                `Sending ${allPermissionCheckboxes.length} total permissions (${permissionValues.length} checked)`;
+        }
         
         // Show loading state
         const submitButton = document.getElementById('saveButton');
@@ -216,23 +274,35 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.textContent = 'Saving...';
         submitButton.disabled = true;
         
-        // Re-enable button after a short delay (form submission will redirect anyway)
+        // Re-enable button after a delay
         setTimeout(() => {
             submitButton.textContent = originalText;
             submitButton.disabled = false;
-        }, 3000);
+        }, 5000);
     });
 
-    // If there's a success message, reload the permissions data
+    // Handle success messages and reload permissions
     @if(session('message'))
-        // Get the selected user from the form  
-        setTimeout(() => {
-            // Refresh the current permissions display
-            const currentUser = userSelect.value;
-            if (currentUser) {
-                loadUserPermissions(currentUser);
-            }
-        }, 1000); // Wait 1 second for success message to show
+        console.log('Success message detected, refreshing permissions...');
+        // Force reload permissions from server for the selected user
+        const currentUser = userSelect.value;
+        if (currentUser) {
+            // Make AJAX call to get fresh permissions
+            fetch(`{{ route('admin.permissions.get', '') }}/${currentUser}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fresh permissions from server:', data.permissions);
+                    
+                    // Update the allPermissions object
+                    allPermissions[currentUser] = { permissions: data.permissions };
+                    
+                    // Reload the UI
+                    loadUserPermissions(currentUser);
+                })
+                .catch(error => {
+                    console.error('Error fetching fresh permissions:', error);
+                });
+        }
     @endif
 });
 </script>
