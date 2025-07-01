@@ -166,13 +166,50 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!email) {
             // Clear all checkboxes
             document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
+            
+            // Update debug info
+            if (document.getElementById('debugUser')) {
+                document.getElementById('debugUser').textContent = 'None';
+                document.getElementById('debugLoaded').textContent = 'None';
+            }
             return;
         }
 
+        // Check if we have permissions for this user
+        if (!allPermissions[email]) {
+            console.log('No cached permissions for user, fetching from server:', email);
+            
+            // Fetch permissions from server
+            fetch(`/admin/permissions/${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the allPermissions cache
+                    allPermissions[email] = { permissions: data.permissions };
+                    
+                    // Now load the permissions
+                    loadUserPermissionsFromCache(email);
+                })
+                .catch(error => {
+                    console.error('Error fetching permissions:', error);
+                    // Still try to load from cache (empty)
+                    loadUserPermissionsFromCache(email);
+                });
+        } else {
+            loadUserPermissionsFromCache(email);
+        }
+    }
+
+    function loadUserPermissionsFromCache(email) {
         // Get the user's current permissions
         const userPermissions = allPermissions[email]?.permissions || [];
         
         console.log('Loading permissions for:', email, userPermissions); // Debug log
+
+        // Update debug info
+        if (document.getElementById('debugUser')) {
+            document.getElementById('debugUser').textContent = email;
+            document.getElementById('debugLoaded').textContent = userPermissions.length + ' permissions';
+        }
 
         // Clear all checkboxes first
         document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
@@ -288,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentUser = userSelect.value;
         if (currentUser) {
             // Make AJAX call to get fresh permissions
-            fetch(`{{ route('admin.permissions.get', '') }}/${currentUser}`)
+            fetch(`/admin/permissions/${encodeURIComponent(currentUser)}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log('Fresh permissions from server:', data.permissions);
@@ -297,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     allPermissions[currentUser] = { permissions: data.permissions };
                     
                     // Reload the UI
-                    loadUserPermissions(currentUser);
+                    loadUserPermissionsFromCache(currentUser);
                 })
                 .catch(error => {
                     console.error('Error fetching fresh permissions:', error);
