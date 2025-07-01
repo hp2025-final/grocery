@@ -104,6 +104,7 @@
                 <span>{{ session('success') }}</span>
             </div>
         @endif
+        @if($canCreate)
         <form method="POST" action="{{ route('sales.store') }}" x-data="salesForm()" @submit.prevent="submitForm">
             @csrf            
             <div class="space-y-2">
@@ -218,12 +219,18 @@
                 <!-- Submit Button -->
                 <div class="flex justify-end pt-2">
                     <button type="submit" 
-                        class="bg-gray-900 hover:bg-gray-800 text-white font-medium rounded text-xs px-4 py-1.5 transition">
+                        class="bg-gray-900 hover:bg-gray-800 text-white font-medium rounded text-xs px-4 py-1.5 transition"
+                        @if(!$canCreate) disabled style="opacity:0.5;cursor:not-allowed;" @endif>
                         Save Sale
                     </button>
                 </div>
             </div>
         </form>
+        @else
+            <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 rounded px-4 py-3 my-4">
+                You do not have permission to create a new sale from this page.
+            </div>
+        @endif
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>

@@ -155,10 +155,20 @@ class PermissionController extends Controller
             ]
         ],
         'Admin' => [
+            'Sales Form Copy' => [
+                'admin.sales-form-copy.view' => 'View Sales Form Copy',
+                'admin.sales-form-copy.create' => 'Create Sales Form Copy',
+                'admin.sales-form-copy.edit' => 'Edit Sales Form Copy',
+                'admin.sales-form-copy.delete' => 'Delete Sales Form Copy',
+            ],
+            'Purchase Form Copy' => [
+                'admin.purchase-form-copy.view' => 'View Purchase Form Copy',
+                'admin.purchase-form-copy.create' => 'Create Purchase Form Copy',
+                'admin.purchase-form-copy.edit' => 'Edit Purchase Form Copy',
+                'admin.purchase-form-copy.delete' => 'Delete Purchase Form Copy',
+            ],
             'Settings' => [
                 'admin.index' => 'Access Admin Dashboard',
-                'admin.sales-form-copy' => 'View Sales Form Settings',
-                'admin.purchase-form-copy' => 'View Purchase Form Settings',
                 'admin.permissions.index' => 'Manage User Permissions',
                 'admin.permissions.store' => 'Save User Permissions'
             ]

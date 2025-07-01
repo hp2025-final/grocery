@@ -24,9 +24,14 @@ class AdminController extends Controller
      */
     public function salesFormCopy()
     {
+        $user = auth()->user();
+        // Only allow users with view permission
+        if (!$user || !$this->hasPermission($user, 'admin.sales-form-copy.view')) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to view this page.');
+        }
+
         $customers = Customer::orderBy('name')->get();
         $categories = InventoryCategory::orderBy('name')->get();
-        
         $products = Inventory::with('category')
             ->orderBy('name')
             ->get()
@@ -42,14 +47,26 @@ class AdminController extends Controller
             })
             ->values()
             ->toArray();
-        
-        return view('admin.sales-form-copy', compact('customers', 'products', 'categories'));
+
+        // Pass CRUD permissions to the view
+        $canCreate = $this->hasPermission($user, 'admin.sales-form-copy.create');
+        $canEdit = $this->hasPermission($user, 'admin.sales-form-copy.edit');
+        $canDelete = $this->hasPermission($user, 'admin.sales-form-copy.delete');
+
+        return view('admin.sales-form-copy', compact('customers', 'products', 'categories', 'canCreate', 'canEdit', 'canDelete'));
     }
     
     /**
      * Show the purchase form copy page
-     */    public function purchaseFormCopy()
+     */
+    public function purchaseFormCopy()
     {
+        $user = auth()->user();
+        // Only allow users with view permission
+        if (!$user || !$this->hasPermission($user, 'admin.purchase-form-copy.view')) {
+            return redirect()->route('dashboard')->with('error', 'You do not have permission to view this page.');
+        }
+
         $vendors = \App\Models\Vendor::orderBy('name')->get();
         $categories = InventoryCategory::orderBy('name')->get();
         $products = Inventory::with('category')
@@ -65,7 +82,23 @@ class AdminController extends Controller
                     'category_name' => $p->category ? $p->category->name : null,
                 ];
             })->values()->toArray();
-        
-        return view('admin.purchase-form-copy', compact('vendors', 'products', 'categories'));
+
+        // Pass CRUD permissions to the view
+        $canCreate = $this->hasPermission($user, 'admin.purchase-form-copy.create');
+        $canEdit = $this->hasPermission($user, 'admin.purchase-form-copy.edit');
+        $canDelete = $this->hasPermission($user, 'admin.purchase-form-copy.delete');
+
+        return view('admin.purchase-form-copy', compact('vendors', 'products', 'categories', 'canCreate', 'canEdit', 'canDelete'));
+    }
+
+    // Helper to check permission for current user
+    private function hasPermission($user, $permission)
+    {
+        if (!$user) return false;
+        if (in_array($user->email, config('superadmins.emails', []))) return true;
+        $permissions = \Illuminate\Support\Facades\Storage::exists('user_permissions.json')
+            ? json_decode(\Illuminate\Support\Facades\Storage::get('user_permissions.json'), true)
+            : [];
+        return in_array($permission, $permissions[$user->email]['permissions'] ?? []);
     }
 }
