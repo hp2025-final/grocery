@@ -11,173 +11,265 @@ class PermissionController extends Controller
 {    
     private $moduleGroups = [
         'Receivables' => [
-            'Add Sale' => [
+            'Sales Management' => [
                 'sales.create' => 'Create New Sale Invoice',
                 'sales.store' => 'Save Sale Invoice',
-                'sales.edit' => 'Edit Sale Invoice',
-                'sales.update' => 'Update Sale Invoice'
-            ],
-            'All Sale Invoices' => [
                 'sales.index' => 'View All Sale Invoices',
                 'sales.show' => 'View Single Sale Invoice',
+                'sales.edit' => 'Edit Sale Invoice',
+                'sales.update' => 'Update Sale Invoice',
+                'sales.destroy' => 'Delete Sale Invoice',
                 'sales.pdf' => 'Print Sale Invoice',
-                'sales.destroy' => 'Delete Sale Invoice'
+                'sales.export_pdf' => 'Export All Sales PDF'
             ],
-            'Customer Receipt' => [
+            'Customer Management' => [
+                'customers.index' => 'View All Customers',
+                'customers.create' => 'Create New Customer',
+                'customers.store' => 'Save Customer',
+                'customers.edit' => 'Edit Customer',
+                'customers.update' => 'Update Customer',
+                'customers.destroy' => 'Delete Customer'
+            ],
+            'Customer Receipts' => [
+                'customer-receipts.index' => 'View All Customer Receipts',
                 'customer-receipts.create' => 'Create New Receipt',
                 'customer-receipts.store' => 'Save Receipt',
                 'customer-receipts.edit' => 'Edit Receipt',
                 'customer-receipts.update' => 'Update Receipt',
-                'customer-receipts.destroy' => 'Delete Receipt'
+                'customer-receipts.destroy' => 'Delete Receipt',
+                'customer-receipts.live-search' => 'Search Receipts',
+                'customer-receipts.export-pdf' => 'Export Receipt PDF',
+                'customer-receipts.export-table' => 'Export Receipt Table',
+                'customer-receipts.create-from-sale' => 'Create Receipt from Sale',
+                'customer-receipts.store-from-sale' => 'Save Receipt from Sale',
+                'receipts.index' => 'View All Receipts'
             ],
-            'Add Customer' => [
-                'customers.create' => 'Create New Customer',
-                'customers.store' => 'Save Customer',
-                'customers.edit' => 'Edit Customer',
-                'customers.update' => 'Update Customer'
-            ],
-            'View Balances' => [
+            'Customer Reports' => [
+                'customers.ledger' => 'View Customer Ledger',
+                'customers.ledger.export' => 'Export Customer Ledger PDF',
                 'customer-balances.index' => 'View Customer Balances',
-                'customer-balances.export' => 'Export Customer Balances',
-                'customers.ledger' => 'View Customer Ledger'
+                'customer-balances.export' => 'Export Customer Balances PDF',
+                'reports.customer_list' => 'View Customer List Report'
             ]
         ],
         'Payables' => [
-            'Add Purchase' => [
+            'Purchase Management' => [
                 'purchases.create' => 'Create New Purchase Invoice',
                 'purchases.store' => 'Save Purchase Invoice',
-                'purchases.edit' => 'Edit Purchase Invoice',
-                'purchases.update' => 'Update Purchase Invoice'
-            ],
-            'All Purchases' => [
                 'purchases.index' => 'View All Purchases',
                 'purchases.show' => 'View Single Purchase',
-                'purchases.pdf' => 'Print Purchase Invoice',
-                'purchases.destroy' => 'Delete Purchase'
+                'purchases.edit' => 'Edit Purchase Invoice',
+                'purchases.update' => 'Update Purchase Invoice',
+                'purchases.destroy' => 'Delete Purchase',
+                'purchases.pdf' => 'Print Purchase Invoice'
             ],
-            'Vendor Payment' => [
-                'vendor-payments.create' => 'Create New Payment',
-                'vendor-payments.store' => 'Save Payment',
-                'vendor-payments.show' => 'View Payment',
-                'vendor-payments.destroy' => 'Delete Payment'
-            ],
-            'Add Vendor' => [
+            'Vendor Management' => [
+                'vendors.index' => 'View All Vendors',
                 'vendors.create' => 'Create New Vendor',
                 'vendors.store' => 'Save Vendor',
                 'vendors.edit' => 'Edit Vendor',
-                'vendors.update' => 'Update Vendor'
+                'vendors.update' => 'Update Vendor',
+                'vendors.destroy' => 'Delete Vendor'
             ],
-            'View Balances' => [
+            'Vendor Payments' => [
+                'vendor-payments.index' => 'View All Vendor Payments',
+                'vendor-payments.create' => 'Create New Payment',
+                'vendor-payments.store' => 'Save Payment',
+                'vendor-payments.edit' => 'Edit Payment',
+                'vendor-payments.update' => 'Update Payment',
+                'vendor-payments.destroy' => 'Delete Payment',
+                'vendor-payments.live-search' => 'Search Payments',
+                'vendor-payments.export-pdf' => 'Export Payment PDF',
+                'vendor-payments.export-table' => 'Export Payment Table',
+                'vendor-payments.create-from-purchase' => 'Create Payment from Purchase',
+                'vendor-payments.store-from-purchase' => 'Save Payment from Purchase'
+            ],
+            'Vendor Reports' => [
+                'vendors.ledger' => 'View Vendor Ledger',
+                'vendors.ledger.export' => 'Export Vendor Ledger PDF',
                 'vendor-balances.index' => 'View Vendor Balances',
-                'vendor-balances.export' => 'Export Vendor Balances',
-                'vendors.ledger' => 'View Vendor Ledger'
+                'vendor-balances.export' => 'Export Vendor Balances PDF'
             ]
         ],
-        'Inventory' => [
-            'Add Product' => [
+        'Inventory Management' => [
+            'Product Management' => [
+                'inventory.index' => 'View All Products',
                 'inventory.create' => 'Create New Product',
                 'inventory.store' => 'Save Product',
                 'inventory.edit' => 'Edit Product',
                 'inventory.update' => 'Update Product',
                 'inventory.destroy' => 'Delete Product'
             ],
-            'All Products' => [
-                'inventory.index' => 'View All Products'
-            ],
-            'Categories' => [
-                'inventory-categories.index' => 'View Categories',
+            'Product Categories' => [
+                'inventory-categories.index' => 'View Product Categories',
                 'inventory-categories.create' => 'Create New Category',
                 'inventory-categories.store' => 'Save Category',
                 'inventory-categories.edit' => 'Edit Category',
                 'inventory-categories.update' => 'Update Category',
                 'inventory-categories.destroy' => 'Delete Category'
             ],
-            'Stock Adjustment' => [
+            'Stock Adjustments' => [
+                'stock-adjustments.index' => 'View All Stock Adjustments',
                 'stock-adjustments.create' => 'Create New Adjustment',
                 'stock-adjustments.store' => 'Save Adjustment',
-                'stock-adjustments.index' => 'View All Adjustments'
+                'stock-adjustments.edit' => 'Edit Adjustment',
+                'stock-adjustments.update' => 'Update Adjustment',
+                'stock-adjustments.destroy' => 'Delete Adjustment'
             ],
-            'Reports' => [
+            'Inventory Ledger' => [
+                'inventory.ledger' => 'View Inventory Ledger',
+                'inventory.ledger.export' => 'Export Inventory Ledger PDF',
+                'inventory.ledger.without_rate' => 'View Ledger Without Rate',
+                'inventory.ledger.without_rate.export' => 'Export Ledger Without Rate PDF'
+            ],
+            'Inventory Reports' => [
                 'inventory-balances.index' => 'View Stock Balances',
-                'inventory-balances.export' => 'Export Stock Balances',
+                'inventory-balances.export' => 'Export Stock Balances PDF',
+                'inventory-balances.export-without-prices' => 'Export Stock Without Prices',
                 'inventory-values.index' => 'View Stock Values',
                 'inventory-values.export-pdf' => 'Export Stock Values PDF',
-                'inventory-values.info' => 'View Stock Information'
+                'inventory-values.info' => 'Download Stock Information',
+                'reports.inventory.by-category' => 'View Inventory by Category',
+                'reports.inventory.product-list' => 'View Product List Report',
+                'reports.inventory.product-list.export' => 'Export Product List PDF'
             ]
         ],
-        'Banking' => [
-            'Bank Account' => [
+        'Banking & Cash Management' => [
+            'Bank Account Management' => [
+                'banks.index' => 'View All Bank Accounts',
                 'banks.create' => 'Create New Bank Account',
                 'banks.store' => 'Save Bank Account',
                 'banks.edit' => 'Edit Bank Account',
                 'banks.update' => 'Update Bank Account',
-                'banks.destroy' => 'Delete Bank Account',
-                'banks.index' => 'View All Bank Accounts'
+                'banks.destroy' => 'Delete Bank Account'
             ],
-            'Bank Transfer' => [
+            'Bank Transfers' => [
+                'bank_transfers.index' => 'View All Bank Transfers',
                 'bank_transfers.create' => 'Create New Transfer',
                 'bank_transfers.store' => 'Save Transfer',
-                'bank_transfers.destroy' => 'Delete Transfer'
+                'bank_transfers.edit' => 'Edit Transfer',
+                'bank_transfers.update' => 'Update Transfer',
+                'bank_transfers.destroy' => 'Delete Transfer',
+                'bank_transfers.live_search' => 'Search Bank Transfers'
             ],
-            'Reports' => [
+            'Bank Reports' => [
+                'banks.ledger' => 'View Bank Ledger',
+                'banks.ledger.export' => 'Export Bank Ledger PDF',
                 'bank-balances.index' => 'View Bank Balances',
-                'bank-balances.export' => 'Export Bank Report',
-                'banks.ledger' => 'View Bank Ledger'
+                'bank-balances.export' => 'Export Bank Balances PDF'
             ]
         ],
-        'Expenses' => [
-            'Add Expense' => [
+        'Expense Management' => [
+            'Expense Transactions' => [
+                'expenses.index' => 'View All Expenses',
                 'expenses.create' => 'Create New Expense',
                 'expenses.store' => 'Save Expense',
                 'expenses.edit' => 'Edit Expense',
-                'expenses.destroy' => 'Delete Expense'
+                'expenses.update' => 'Update Expense',
+                'expenses.destroy' => 'Delete Expense',
+                'expenses.tableAjax' => 'Load Expenses Table Data'
             ],
-            'All Expenses' => [
-                'expenses.index' => 'View All Expenses'
+            'Expense Account Setup' => [
+                'expense_accounts.index' => 'View All Expense Accounts',
+                'expense-accounts.create' => 'Create New Expense Account',
+                'expense-accounts.store' => 'Save Expense Account',
+                'expense-accounts.edit' => 'Edit Expense Account',
+                'expense-accounts.update' => 'Update Expense Account',
+                'expense-accounts.destroy' => 'Delete Expense Account'
             ],
-            'Account Setup' => [
-                'expense-accounts.create' => 'Create New Account',
-                'expense-accounts.store' => 'Save Account',
-                'expense-accounts.index' => 'View All Accounts'
-            ],
-            'Reports' => [
-                'accounts.ledger' => 'View Expense Ledger'
+            'Expense Reports' => [
+                'accounts.ledger' => 'View Expense Account Ledger',
+                'expense-accounts.ledger.filter' => 'Filter Expense Ledger',
+                'expense-accounts.ledger.export' => 'Export Expense Ledger PDF'
             ]
         ],
-        'Reports' => [
-            'Financial Reports' => [
+        'Financial Reports' => [
+            'Core Financial Reports' => [
                 'reports.trial_balance' => 'View Trial Balance',
+                'reports.trial_balance.export' => 'Export Trial Balance PDF',
                 'reports.general_ledger' => 'View General Ledger',
-                'reports.journal' => 'View Journal Entries',
+                'reports.general_ledger.export' => 'Export General Ledger PDF',
                 'reports.income_statement' => 'View Income Statement',
+                'reports.income_statement.export' => 'Export Income Statement PDF',
                 'reports.balance_sheet' => 'View Balance Sheet',
-                'reports.customer_list' => 'View Customer List'
+                'reports.balance_sheet.export' => 'Export Balance Sheet PDF'
+            ],
+            'Transaction Reports' => [
+                'reports.journal' => 'View Journal Entries Report',
+                'reports.journal.export' => 'Export Journal Report PDF',
+                'reports.daily_book' => 'View Daily Book Report',
+                'reports.daily_book.export' => 'Export Daily Book PDF'
+            ],
+            'Analysis Reports' => [
+                'reports.cash_flow' => 'View Cash Flow Report',
+                'reports.profit_loss' => 'View Profit & Loss Report',
+                'reports.financial_summary' => 'View Financial Summary'
             ]
         ],
-        'Admin' => [
-            'Sales Form Copy' => [
-                'admin.sales-form-copy.view' => 'View Sales Form Copy',
-                'admin.sales-form-copy.create' => 'Create Sales Form Copy',
-                'admin.sales-form-copy.edit' => 'Edit Sales Form Copy',
-                'admin.sales-form-copy.delete' => 'Delete Sales Form Copy',
+        'Chart of Accounts' => [
+            'Account Management' => [
+                'chart-accounts.index' => 'View Chart of Accounts',
+                'chart-accounts.create' => 'Create New Account',
+                'chart-accounts.store' => 'Save Account',
+                'chart-accounts.edit' => 'Edit Account',
+                'chart-accounts.update' => 'Update Account',
+                'chart-accounts.destroy' => 'Delete Account',
+                'chart-accounts.show' => 'View Account Details'
             ],
-            'Purchase Form Copy' => [
-                'admin.purchase-form-copy.view' => 'View Purchase Form Copy',
-                'admin.purchase-form-copy.create' => 'Create Purchase Form Copy',
-                'admin.purchase-form-copy.edit' => 'Edit Purchase Form Copy',
-                'admin.purchase-form-copy.delete' => 'Delete Purchase Form Copy',
-            ],
-            'Settings' => [
+            'Account Reports' => [
+                'chart-accounts.ledger' => 'View Account Ledger',
+                'chart-accounts.ledger.export' => 'Export Account Ledger PDF',
+                'chart-accounts.balance' => 'View Account Balance',
+                'chart-accounts.export' => 'Export Chart of Accounts'
+            ]
+        ],
+        'Administration' => [
+            'System Settings' => [
                 'admin.index' => 'Access Admin Dashboard',
+                'admin.settings' => 'Manage System Settings',
+                'admin.company-settings' => 'Manage Company Settings',
+                'admin.sales-form-copy' => 'Create Sales via Admin Form (Full Access)',
+                'admin.purchase-form-copy' => 'Create Purchases via Admin Form (Full Access)'
+            ],
+            'Permission Management' => [
                 'admin.permissions.index' => 'Manage User Permissions',
-                'admin.permissions.store' => 'Save User Permissions'
+                'admin.permissions.store' => 'Save User Permissions',
+                'admin.permissions.get' => 'Get User Permissions',
+                'admin.permissions.reset' => 'Reset User Permissions'
+            ],
+            'User Management' => [
+                'admin.users.index' => 'View All Users',
+                'admin.users.create' => 'Create New User',
+                'admin.users.store' => 'Save User',
+                'admin.users.edit' => 'Edit User',
+                'admin.users.update' => 'Update User',
+                'admin.users.destroy' => 'Delete User',
+                'admin.users.permissions' => 'Manage User Specific Permissions'
+            ],
+            'System Maintenance' => [
+                'admin.backup' => 'Backup System Data',
+                'admin.restore' => 'Restore System Data',
+                'admin.logs' => 'View System Logs',
+                'admin.clear-cache' => 'Clear System Cache'
             ]
         ],
-        'Dashboard' => [
-            'Analytics' => [
+        'Dashboard & Analytics' => [
+            'Dashboard Access' => [
+                'dashboard' => 'Access Main Dashboard',
                 'dashboard.kpis' => 'View KPI Metrics',
-                'dashboard.journal-entries' => 'View Recent Entries',
-                'dashboard.sale-chart' => 'View Sales Charts'
+                'dashboard.analytics' => 'View Analytics Dashboard'
+            ],
+            'Real-time Data' => [
+                'dashboard.journal-entries' => 'View Recent Journal Entries',
+                'dashboard.sale-chart' => 'View Sales Charts',
+                'dashboard.financial-overview' => 'View Financial Overview',
+                'dashboard.cash-flow-chart' => 'View Cash Flow Charts'
+            ],
+            'Quick Actions' => [
+                'dashboard.quick-sale' => 'Quick Sale Entry',
+                'dashboard.quick-expense' => 'Quick Expense Entry',
+                'dashboard.quick-receipt' => 'Quick Receipt Entry',
+                'dashboard.quick-payment' => 'Quick Payment Entry'
             ]
         ]
     ];

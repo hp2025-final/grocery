@@ -96,7 +96,6 @@
                 <span>{{ session('success') }}</span>
             </div>
         @endif
-        @if($canCreate)
         <form method="POST" action="{{ route('purchases.store') }}" x-data="purchaseForm()" @submit.prevent="submitForm">
             @csrf
             <input type="hidden" name="from_admin_copy" value="1">
@@ -210,18 +209,11 @@
                 <!-- Submit Button -->
                 <div class="flex justify-end pt-2">
                     <button type="submit" 
-                        class="bg-gray-900 hover:bg-gray-800 text-white font-medium rounded text-xs px-4 py-1.5 transition"
-                        @if(!$canCreate) disabled style="opacity:0.5;cursor:not-allowed;" @endif>
+                        class="bg-gray-900 hover:bg-gray-800 text-white font-medium rounded text-xs px-4 py-1.5 transition">
                         Save Purchase
-                    </button>
-                </div>
+                    </button>                </div>
             </div>
         </form>
-        @else
-            <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 rounded px-4 py-3 my-4">
-                You do not have permission to create a new purchase from this page.
-            </div>
-        @endif
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
