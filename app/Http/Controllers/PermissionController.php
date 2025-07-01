@@ -283,7 +283,7 @@ class PermissionController extends Controller
         }
 
         $users = User::all();
-        $allPermissions = $this->getUserPermissions();
+        $allPermissions = $this->refreshPermissions(); // Use refreshed permissions
         
         // Get all named routes grouped by module
         $routeGroups = $this->getGroupedRoutes();
@@ -303,7 +303,7 @@ class PermissionController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $permissions = $this->getUserPermissions();
+        $permissions = $this->refreshPermissions(); // Use refreshed permissions
         return response()->json([
             'permissions' => $permissions[$email]['permissions'] ?? []
         ]);
@@ -321,18 +321,27 @@ class PermissionController extends Controller
             'permissions' => 'array'
         ]);
 
-        $permissions = $this->getUserPermissions();
+        $permissions = $this->refreshPermissions(); // Use refreshed permissions
+        $selectedUserEmail = $request->user;
+        $newPermissions = $request->permissions ?? [];
 
-        // Update permissions for the user
-        $permissions[$request->user] = [
-            'permissions' => $request->permissions ?? [],
-            'is_super_admin' => in_array($request->user, config('superadmins.emails', []))
-        ];
+        // Ensure the user exists in the permissions array
+        if (!isset($permissions[$selectedUserEmail])) {
+            $permissions[$selectedUserEmail] = [
+                'permissions' => [],
+                'is_super_admin' => in_array($selectedUserEmail, config('superadmins.emails', []))
+            ];
+        }
+
+        // Update permissions for the selected user (this completely replaces their permissions with the new set)
+        $permissions[$selectedUserEmail]['permissions'] = $newPermissions;
+        $permissions[$selectedUserEmail]['is_super_admin'] = in_array($selectedUserEmail, config('superadmins.emails', []));
 
         // Save to JSON file
         Storage::put('user_permissions.json', json_encode($permissions, JSON_PRETTY_PRINT));
 
-        return redirect()->back()->with('message', 'Permissions updated successfully');
+        return redirect()->back()
+            ->with('message', 'Permissions updated successfully for ' . $selectedUserEmail . '. User now has ' . count($newPermissions) . ' permissions assigned.');
     }
 
     private function isSuperAdmin($email)
@@ -358,5 +367,14 @@ class PermissionController extends Controller
         ];
         Storage::put('user_permissions.json', json_encode($defaultPermissions, JSON_PRETTY_PRINT));
         return $defaultPermissions;
+    }
+
+    private function refreshPermissions()
+    {
+        // Force reload from storage
+        if (Storage::exists('user_permissions.json')) {
+            return json_decode(Storage::get('user_permissions.json'), true) ?? [];
+        }
+        return $this->initializePermissionsFile();
     }
 }

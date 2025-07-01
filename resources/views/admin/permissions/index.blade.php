@@ -14,9 +14,9 @@
                     </div>
                 @endif
 
-                @if(session('success'))
+                @if(session('message'))
                     <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        {{ session('success') }}
+                        {{ session('message') }}
                     </div>
                 @endif
 
@@ -72,8 +72,14 @@
 
                     <div class="flex justify-end">
                         <button type="submit" 
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                                id="saveButton">
                             Save Permissions
+                        </button>
+                        <button type="button" 
+                                class="ml-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                                onclick="clearAllPermissions()">
+                            Clear All
                         </button>
                     </div>
                 </form>
@@ -140,36 +146,95 @@
 
 @push('scripts')
 <script>
-document.getElementById('user').addEventListener('change', function() {
-    const email = this.value;
-    if (!email) {
-        // Clear all checkboxes
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        return;
+document.addEventListener('DOMContentLoaded', function() {
+    const userSelect = document.getElementById('user');
+    const allPermissions = @json($allPermissions);
+    
+    function loadUserPermissions(email) {
+        if (!email) {
+            // Clear all checkboxes
+            document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
+            return;
+        }
+
+        // Get the user's current permissions
+        const userPermissions = allPermissions[email]?.permissions || [];
+        
+        console.log('Loading permissions for:', email, userPermissions); // Debug log
+
+        // Clear all checkboxes first
+        document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
+
+        // Set the checkboxes based on user's permissions
+        userPermissions.forEach(permission => {
+            const checkbox = document.getElementById(`permission_${permission}`);
+            if (checkbox) {
+                checkbox.checked = true;
+                console.log('Checked permission:', permission); // Debug log
+            } else {
+                console.log('Checkbox not found for permission:', permission); // Debug log
+            }
+        });
     }
 
-    // Get the pre-loaded permissions
-    const allPermissions = @json($allPermissions);
-    const userPermissions = allPermissions[email]?.permissions || [];
-
-    // Clear all checkboxes first
-    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-
-    // Set the checkboxes based on user's permissions
-    userPermissions.forEach(permission => {
-        const checkbox = document.getElementById(`permission_${permission}`);
-        if (checkbox) checkbox.checked = true;
+    // Handle user selection change
+    userSelect.addEventListener('change', function() {
+        const email = this.value;
+        loadUserPermissions(email);
     });
-});
 
-// Pre-select user if there's one in the URL
-const urlParams = new URLSearchParams(window.location.search);
-const userEmail = urlParams.get('user');
-if (userEmail) {
-    const userSelect = document.getElementById('user');
-    userSelect.value = userEmail;
-    userSelect.dispatchEvent(new Event('change'));
-}
+    // Pre-select user if there's one in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('user');
+    if (userEmail) {
+        userSelect.value = userEmail;
+        loadUserPermissions(userEmail);
+    }
+
+    // Function to clear all permissions
+    function clearAllPermissions() {
+        if (confirm('Are you sure you want to clear all permissions for the selected user?')) {
+            document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
+        }
+    }
+
+    // Form submission validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const selectedUser = userSelect.value;
+        if (!selectedUser) {
+            e.preventDefault();
+            alert('Please select a user first.');
+            return false;
+        }
+
+        const checkedPermissions = document.querySelectorAll('input[name="permissions[]"]:checked');
+        console.log('Submitting permissions:', Array.from(checkedPermissions).map(cb => cb.value)); // Debug log
+        
+        // Show loading state
+        const submitButton = document.getElementById('saveButton');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Saving...';
+        submitButton.disabled = true;
+        
+        // Re-enable button after a short delay (form submission will redirect anyway)
+        setTimeout(() => {
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+        }, 3000);
+    });
+
+    // If there's a success message, reload the permissions data
+    @if(session('message'))
+        // Get the selected user from the form  
+        setTimeout(() => {
+            // Refresh the current permissions display
+            const currentUser = userSelect.value;
+            if (currentUser) {
+                loadUserPermissions(currentUser);
+            }
+        }, 1000); // Wait 1 second for success message to show
+    @endif
+});
 </script>
 @endpush
 @endsection
